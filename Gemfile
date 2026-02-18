@@ -48,7 +48,7 @@ gem "bootstrap", "~> 5.3"
 gem "dartsass-rails"
 
 # Excel file reading
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
 # Excel file writing
 gem "write_xlsx"
 
