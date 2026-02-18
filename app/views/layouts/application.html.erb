@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html data-theme="light">
+  <head>
+    <title><%= content_for(:title) || "Handy Promo" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Handy Promo">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    
+    <%# Google Fonts - Roboto %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <%# Bootstrap Icons %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <%# Estilos de Handy - Variables de color %>
+    <%= stylesheet_link_tag "variables-color", "data-turbo-track": "reload" %>
+    
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    
+    <%# Componentes de Handy - Cargar después de application para sobrescribir estilos %>
+    <%= stylesheet_link_tag "componentes", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    
+    <%# Bootstrap JS Bundle (includes Popper) - Cargar después de los otros scripts %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <% if user_signed_in? %>
+      <%# Navbar Superior Fijo %>
+      <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style="z-index: 1030;">
+        <div class="container-fluid">
+          <%# Logo y campo de búsqueda juntos a la izquierda %>
+          <div class="d-flex align-items-center">
+            <a class="navbar-brand me-3" href="<%= root_path %>">
+              <div class="d-inline-block align-text-top bg-primary rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">HP</div>
+            </a>
+            
+            <%# Campo de búsqueda - junto al logo %>
+            <div class="d-flex" style="width: 300px;">
+              <input class="form-control" type="search" placeholder="Buscar..." aria-label="Search">
+            </div>
+          </div>
+          
+          <%# Información del usuario en sesión con dropdown %>
+          <div class="dropdown">
+            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="rounded-circle me-2 bg-secondary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; color: white; font-weight: bold; font-size: 14px;"><%= current_user.name.first.upcase %></div>
+              <span class="text-dark"><%= current_user.name %></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li>
+                <%= link_to destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item" do %>
+                  <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                <% end %>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <%# Contenedor del Sidebar y Menú Horizontal %>
+      <div data-controller="sidebar-menu">
+        <%# Sidebar Lateral Izquierdo Fijo %>
+        <div class="sidebar fixed-left bg-light" style="position: fixed; top: 56px; left: 0; height: calc(100vh - 56px); width: 70px; z-index: 1020; overflow-y: auto; padding: 15px 0;">
+          <div class="d-flex flex-column align-items-center">
+            <%# Botón Menú Hamburguesa %>
+            <button type="button" 
+                    class="btn btn-outline-primary mb-2 sidebar-icon-btn" 
+                    data-action="click->sidebar-menu#toggle"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="right" 
+                    title="Menú">
+              <i class="bi bi-list"></i>
+            </button>
+            
+            <%# Botones de Acceso Rápido Principales %>
+            <%= link_to root_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn", 
+                data: { bs_toggle: "tooltip", bs_placement: "right" }, 
+                title: "Dashboard" do %>
+              <i class="bi bi-house"></i>
+            <% end %>
+            <%= link_to users_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn", 
+                data: { bs_toggle: "tooltip", bs_placement: "right" }, 
+                title: "Usuarios" do %>
+              <i class="bi bi-person"></i>
+            <% end %>
+            <%= link_to chains_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn", 
+                data: { bs_toggle: "tooltip", bs_placement: "right" }, 
+                title: "Cadenas" do %>
+              <i class="bi bi-shop-window"></i>
+            <% end %>
+            <%= link_to stores_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn", 
+                data: { bs_toggle: "tooltip", bs_placement: "right" }, 
+                title: "Tiendas" do %>
+              <i class="bi bi-shop"></i>
+            <% end %>
+            <%= link_to work_plans_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn",
+                data: { bs_toggle: "tooltip", bs_placement: "right" },
+                title: "Configuración Planes" do %>
+              <i class="bi bi-clipboard-check"></i>
+            <% end %>
+            <%= link_to work_plan_executions_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn",
+                data: { bs_toggle: "tooltip", bs_placement: "right" },
+                title: "Seguimiento Planes" do %>
+              <i class="bi bi-graph-up-arrow"></i>
+            <% end %>
+            <%= link_to visits_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn",
+                data: { bs_toggle: "tooltip", bs_placement: "right" },
+                title: "Visitas" do %>
+              <i class="bi bi-calendar-check"></i>
+            <% end %>
+            <%= link_to price_updates_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn",
+                data: { bs_toggle: "tooltip", bs_placement: "right" },
+                title: "Actualizaciones de Precios" do %>
+              <i class="bi bi-currency-dollar"></i>
+            <% end %>
+            <%= link_to settings_path, class: "btn btn-outline-primary mb-2 sidebar-icon-btn", 
+                data: { bs_toggle: "tooltip", bs_placement: "right" }, 
+                title: "Configuración" do %>
+              <i class="bi bi-gear"></i>
+            <% end %>
+          </div>
+        </div>
+        
+        <%# Menú Horizontal Desplegable %>
+        <div class="horizontal-menu" 
+             data-sidebar-menu-target="menu"
+             style="position: fixed; top: 56px; left: 70px; width: 0; height: calc(100vh - 56px); background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 1019; overflow: hidden; transition: width 0.3s ease;">
+        <div class="p-4" style="min-width: 300px; width: 300px;">
+          <h5 class="mb-4 text-primary">
+            <i class="bi bi-grid me-2"></i>Menú Principal
+          </h5>
+          
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3">Cadenas y Clientes</h6>
+            <%= link_to formats_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none", 
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-tags me-3"></i>
+              <span>Formatos de Cadena</span>
+            <% end %>
+            <%= link_to segments_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-diagram-3 me-3"></i>
+              <span>Segmentos</span>
+            <% end %>
+            <%= link_to routes_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-map me-3"></i>
+              <span>Rutas</span>
+            <% end %>
+          </div>
+          
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3">Productos</h6>
+            <%= link_to products_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-box me-3"></i>
+              <span>Productos</span>
+            <% end %>
+            <%= link_to product_families_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-folder me-3"></i>
+              <span>Familias de Productos</span>
+            <% end %>
+            <%= link_to unit_of_measures_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-rulers me-3"></i>
+              <span>Unidades de Medida</span>
+            <% end %>
+          </div>
+          
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3">Planes de Trabajo</h6>
+            <%= link_to work_plans_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-clipboard-check me-3"></i>
+              <span>Configuración Planes</span>
+            <% end %>
+            <%= link_to work_plan_executions_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-graph-up-arrow me-3"></i>
+              <span>Seguimiento Planes</span>
+            <% end %>
+            <%= link_to tasks_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-list-task me-3"></i>
+              <span>Tareas Predefinidas</span>
+            <% end %>
+          </div>
+          
+          <div class="mb-4">
+            <h6 class="text-muted text-uppercase small mb-3">Precios</h6>
+            <%= link_to price_updates_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-currency-dollar me-3"></i>
+              <span>Actualizaciones de Precios</span>
+            <% end %>
+            <%= link_to import_price_updates_path, class: "menu-item d-flex align-items-center p-2 mb-2 rounded text-decoration-none",
+                data: { action: "click->sidebar-menu#close" } do %>
+              <i class="bi bi-upload me-3"></i>
+              <span>Importar Precios desde Excel</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# Área de Contenido Principal %>
+      <div class="main-content">
+        <%# Mensajes flash %>
+        <% if notice %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= notice %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+        <% if alert %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= alert %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </div>
+    <% else %>
+      <%# Vista para usuarios no autenticados (páginas de login, registro, etc.) %>
+      <div class="container-fluid">
+        <%# Mensajes flash %>
+        <% if notice %>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= notice %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+        <% if alert %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= alert %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </div>
+    <% end %>
+    
+    <%# Inicializar tooltips de Bootstrap %>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+      
+      // Reinicializar tooltips después de navegación Turbo
+      document.addEventListener('turbo:load', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+    </script>
+  </body>
+</html>

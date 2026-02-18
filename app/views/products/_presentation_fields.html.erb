@@ -1,0 +1,60 @@
+<div class="presentation-card card mb-3 border-primary">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="mb-0 text-primary">
+        <i class="bi bi-tag me-2"></i>Presentación <span class="presentation-number"></span>
+      </h6>
+      <%= f.hidden_field :_destroy, value: false, class: "destroy-field" %>
+      <button type="button" class="btn btn-sm btn-outline-danger remove-presentation-btn">
+        <i class="bi bi-trash me-1"></i> Eliminar
+      </button>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4">
+        <div class="mb-3">
+          <%= f.label :code, "Código", class: "form-label" %>
+          <%= f.text_field :code, class: "form-control", required: true, placeholder: "Ej: BICHO-350" %>
+          <small class="form-text text-muted">Código único de la presentación</small>
+          <% if f.object.errors[:code].any? %>
+            <div class="text-danger small"><%= f.object.errors[:code].join(', ') %></div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="mb-3">
+          <%= f.label :size, "Tamaño", class: "form-label" %>
+          <%= f.number_field :size, class: "form-control", step: 0.01, min: 0, placeholder: "350" %>
+          <small class="form-text text-muted">Número</small>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="mb-3">
+          <%= f.label :unit_of_measure_id, "Unidad", class: "form-label" %>
+          <%= f.select :unit_of_measure_id, 
+              options_from_collection_for_select(unit_of_measures, :id, :name, f.object.unit_of_measure_id),
+              { prompt: "Selecciona..." },
+              { class: "form-select", required: true } %>
+          <% if f.object.errors[:unit_of_measure_id].any? %>
+            <div class="text-danger small"><%= f.object.errors[:unit_of_measure_id].join(', ') %></div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="col-md-2">
+        <div class="mb-3">
+          <%= f.label :barcode, "Código de Barras", class: "form-label" %>
+          <%= f.text_field :barcode, class: "form-control", placeholder: "Opcional" %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <%= f.label :comments, "Comentarios", class: "form-label" %>
+      <%= f.text_area :comments, class: "form-control", rows: 2, placeholder: "Notas sobre esta presentación..." %>
+    </div>
+  </div>
+</div>
+

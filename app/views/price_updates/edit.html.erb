@@ -1,0 +1,23 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Editar Actualización de Precio" do %>
+  <%= link_to price_updates_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-arrow-left me-2"></i> Volver
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de actualización de precio %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>Información de la Actualización</h5>
+      </div>
+      <div class="card-body p-4">
+        <%= render 'form' %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,908 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@work_plan.persisted? ? "Editar Plan de Trabajo" : "Nuevo Plan de Trabajo") do %>
+  <button type="submit" form="work-plan-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar Plan de Trabajo
+  </button>
+  <%= link_to work_plans_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de plan de trabajo %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-10">
+    <%= form_with model: @work_plan, url: (@work_plan.persisted? ? work_plan_path(@work_plan) : work_plans_path), 
+        method: (@work_plan.persisted? ? :patch : :post),
+        local: true,
+        multipart: true,
+        id: "work-plan-form" do |f| %>
+      
+      <% if @work_plan.errors.any? %>
+        <div class="alert alert-danger">
+          <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+          <ul class="mb-0">
+            <% @work_plan.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <% if flash[:alert] %>
+        <div class="alert alert-danger">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+      
+      <%# Información del Plan de Trabajo %>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Información del Plan de Trabajo</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :code, "Código del Plan", class: "form-label fw-bold" %>
+                <%= f.text_field :code, class: "form-control", required: true, autofocus: true, placeholder: "Ej: PLAN-VISITA-001" %>
+                <small class="form-text text-muted">Código único del plan de trabajo</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :name, "Nombre del Plan", class: "form-label fw-bold" %>
+                <%= f.text_field :name, class: "form-control", required: true, placeholder: "Ej: Visita Estándar a Tienda" %>
+                <small class="form-text text-muted">Nombre descriptivo del plan</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Cadena</label>
+                <select id="chain-selector" class="form-select">
+                  <option value="">Selecciona una cadena (opcional)</option>
+                  <% @available_chains.each do |chain| %>
+                    <option value="<%= chain.id %>" <%= 'selected' if @work_plan.format&.chain_id == chain.id %>>
+                      <%= chain.name %>
+                    </option>
+                  <% end %>
+                </select>
+                <small class="form-text text-muted">Primero selecciona la cadena para filtrar los formatos</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :format_id, "Formato de Cadena", class: "form-label fw-bold" %>
+                <%= f.select :format_id, 
+                    options_from_collection_for_select(@available_formats, :id, :name, @work_plan.format_id),
+                    { prompt: "Selecciona un formato (opcional)" },
+                    { class: "form-select", id: "format-selector" } %>
+                <small class="form-text text-muted">Asocia este plan a un formato específico. Si se deja vacío, el plan será genérico.</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-12">
+              <div class="mb-3">
+                <%= f.label :description, "Descripción", class: "form-label fw-bold" %>
+                <%= f.text_area :description, class: "form-control", rows: 3, placeholder: "Descripción del plan de trabajo..." %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%# Área de Tareas %>
+      <div class="row">
+        <%# Columna izquierda: Tareas disponibles %>
+        <div class="col-md-5">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Tareas Disponibles</h5>
+            </div>
+            <div class="card-body p-3" style="max-height: 600px; overflow-y: auto;">
+              <div id="available-tasks-container" class="d-flex flex-column gap-2">
+                <% @available_tasks.each do |task| %>
+                  <div class="task-card card border task-available" 
+                       data-task-id="<%= task.id %>"
+                       data-task-type="<%= task.task_type %>"
+                       draggable="true"
+                       style="cursor: move;">
+                    <div class="card-body p-3">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-grip-vertical text-muted me-2"></i>
+                        <div class="flex-grow-1">
+                          <h6 class="mb-1"><%= task.name %></h6>
+                          <% if task.description.present? %>
+                            <p class="mb-0 mt-1 small text-muted"><%= truncate(task.description, length: 60) %></p>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <%# Columna derecha: Tareas del plan %>
+        <div class="col-md-7">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Tareas del Plan</h5>
+              <span class="badge bg-light text-dark" id="task-count">0</span>
+            </div>
+            <div class="card-body p-3">
+              <div id="plan-tasks-container" class="d-flex flex-column gap-2" style="min-height: 200px;">
+                <% if @work_plan.persisted? && @work_plan_tasks.any? %>
+                  <% @work_plan_tasks.each_with_index do |work_plan_task, index| %>
+                    <div class="task-card card border-primary plan-task-item" 
+                         data-task-id="<%= work_plan_task.task.id %>"
+                         data-work-plan-task-id="<%= work_plan_task.id %>"
+                         data-task-type="<%= work_plan_task.task.task_type %>"
+                         data-task-index="<%= index %>"
+                         draggable="true"
+                         style="cursor: move;">
+                      <div class="card-body p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                          <div class="d-flex align-items-center flex-grow-1">
+                            <i class="bi bi-grip-vertical text-primary me-2"></i>
+                            <div class="flex-grow-1">
+                              <h6 class="mb-1"><%= work_plan_task.task.name %></h6>
+                            </div>
+                          </div>
+                          <div>
+                            <% if work_plan_task.task.photo_capture? || work_plan_task.task.comment_capture? || work_plan_task.task.image_display? || work_plan_task.task.incident_report? || work_plan_task.task.inventory_capture? %>
+                              <button type="button" class="btn btn-sm btn-outline-info toggle-config-btn me-2" data-task-index="<%= index %>">
+                                <i class="bi bi-gear"></i> Configurar
+                              </button>
+                            <% end %>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-task-btn" data-task-id="<%= work_plan_task.task.id %>">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <%# Panel de configuración (inicialmente oculto) %>
+                        <div class="task-config-panel border-top pt-3 mt-2" style="display: none;" data-config-panel="<%= index %>">
+                          <% if work_plan_task.task.photo_capture? || work_plan_task.task.comment_capture? || work_plan_task.task.image_display? || work_plan_task.task.incident_report? || work_plan_task.task.inventory_capture? %>
+                            <div class="mb-3">
+                              <label class="form-label fw-bold">Instrucciones para el Promotor:</label>
+                              <textarea class="form-control task-instructions" 
+                                        rows="3" 
+                                        data-task-id="<%= work_plan_task.task.id %>"
+                                        data-task-index="<%= index %>"
+                                        placeholder="Ej: Por favor registra tus comentarios sobre la nueva promoción en pasillos"><%= work_plan_task.instructions %></textarea>
+                              <small class="form-text text-muted">Escribe las instrucciones que verá el promotor al ejecutar esta tarea</small>
+                            </div>
+                          <% end %>
+                          <% if work_plan_task.task.image_display? %>
+                            <div class="mb-3">
+                              <label class="form-label fw-bold">Imagen a mostrar:</label>
+                              <% if work_plan_task.image.attached? %>
+                                <div class="mb-2">
+                                  <img src="<%= url_for(work_plan_task.image) %>" alt="Imagen actual" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                  <br>
+                                  <small class="text-muted">Imagen actual</small>
+                                </div>
+                              <% end %>
+                              <input type="file" 
+                                     class="form-control task-image-input" 
+                                     accept="image/*"
+                                     data-task-id="<%= work_plan_task.task.id %>"
+                                     data-task-index="<%= index %>"
+                                     data-work-plan-task-id="<%= work_plan_task.id %>">
+                              <small class="form-text text-muted">Selecciona la imagen que verá el promotor</small>
+                            </div>
+                          <% end %>
+                          <% if work_plan_task.task.incident_report? %>
+                            <div class="alert alert-info mb-0">
+                              <i class="bi bi-info-circle me-2"></i>
+                              <strong>Nota:</strong> El promotor podrá capturar un texto descriptivo y tomar una fotografía del incidente cuando ejecute esta tarea. No es necesario configurar una foto de referencia aquí.
+                            </div>
+                          <% end %>
+                          <% if work_plan_task.task.price_update? %>
+                            <div class="alert alert-info mb-0">
+                              <i class="bi bi-info-circle me-2"></i>
+                              <strong>Tarea condicional:</strong> Esta tarea solo aparecerá para el promotor si hay precios pendientes de actualizar para la visita. Los precios se gestionan desde el módulo de Actualizaciones de Precios.
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="text-center text-muted py-5" id="empty-plan-message">
+                    <i class="bi bi-arrow-left-circle fs-1 d-block mb-2"></i>
+                    <p>Arrastra tareas desde la columna izquierda para agregarlas al plan</p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <%# Hidden fields para tareas seleccionadas %>
+      <div id="hidden-task-fields" style="display: none;">
+        <%# Se llenan dinámicamente con JavaScript %>
+      </div>
+      
+    <% end %>
+  </div>
+</div>
+
+<%# JavaScript para drag & drop y gestión de tareas %>
+<script>
+  (function() {
+    'use strict';
+    
+    const availableTasksContainer = document.getElementById('available-tasks-container');
+    const planTasksContainer = document.getElementById('plan-tasks-container');
+    const emptyPlanMessage = document.getElementById('empty-plan-message');
+    const taskCountBadge = document.getElementById('task-count');
+    const hiddenFieldsContainer = document.getElementById('hidden-task-fields');
+    const form = document.getElementById('work-plan-form');
+    
+    let draggedElement = null;
+    let planTasks = [];
+    
+    <% if @work_plan.persisted? && @work_plan_tasks.any? %>
+      <% @work_plan_tasks.each_with_index do |work_plan_task, index| %>
+        planTasks.push({
+          id: <%= work_plan_task.task.id %>,
+          workPlanTaskId: <%= work_plan_task.id %>,
+          name: '<%= j(work_plan_task.task.name) %>',
+          code: '<%= j(work_plan_task.task.code) %>',
+          taskType: '<%= j(work_plan_task.task.task_type) %>',
+          instructions: '<%= j(work_plan_task.instructions || '') %>',
+          hasImage: <%= work_plan_task.image.attached? ? 'true' : 'false' %>,
+          imageUrl: '<%= work_plan_task.image.attached? ? url_for(work_plan_task.image) : '' %>'
+        });
+      <% end %>
+      
+      // Re-renderizar tareas existentes con configuración
+      setTimeout(() => {
+        planTasks.forEach((task, index) => {
+          const existingElement = planTasksContainer.querySelector(`[data-task-id="${task.id}"][data-work-plan-task-id="${task.workPlanTaskId}"]`);
+          if (existingElement) {
+            // Actualizar el elemento existente con la configuración
+            const taskType = task.taskType;
+            const needsInstructions = taskType === 'photo_capture' || taskType === 'comment_capture' || taskType === 'image_display' || taskType === 'incident_report' || taskType === 'inventory_capture';
+            const needsImage = taskType === 'image_display';
+            
+            if (needsInstructions || needsImage) {
+              // Asegurar que el botón de configurar existe
+              let toggleBtn = existingElement.querySelector('.toggle-config-btn');
+              if (!toggleBtn) {
+                const headerDiv = existingElement.querySelector('.d-flex.align-items-center.justify-content-between');
+                if (headerDiv) {
+                  const btnContainer = headerDiv.querySelector('div:last-child');
+                  if (btnContainer) {
+                    toggleBtn = document.createElement('button');
+                    toggleBtn.type = 'button';
+                    toggleBtn.className = 'btn btn-sm btn-outline-info toggle-config-btn me-2';
+                    toggleBtn.setAttribute('data-task-index', index);
+                    toggleBtn.innerHTML = '<i class="bi bi-gear"></i> Configurar';
+                    btnContainer.insertBefore(toggleBtn, btnContainer.firstChild);
+                  }
+                }
+              }
+            }
+          }
+        });
+        setupTaskConfigListeners();
+      }, 100);
+    <% end %>
+    
+    // Actualizar contador y mensaje vacío
+    function updateUI() {
+      const count = planTasks.length;
+      if (taskCountBadge) {
+        taskCountBadge.textContent = count;
+      }
+      
+      if (emptyPlanMessage) {
+        emptyPlanMessage.style.display = count === 0 ? 'block' : 'none';
+      }
+      
+      generateHiddenFields();
+    }
+    
+    // Actualizar índices de todas las tareas
+    function updateTaskIndices() {
+      const taskItems = planTasksContainer.querySelectorAll('.plan-task-item');
+      taskItems.forEach((item, index) => {
+        item.setAttribute('data-task-index', index);
+        const taskId = parseInt(item.getAttribute('data-task-id'));
+        const task = planTasks.find(t => t.id === taskId);
+        if (task) {
+          // Actualizar índices en los campos de configuración
+          const instructionsField = item.querySelector(`.task-instructions[data-task-id="${taskId}"]`);
+          if (instructionsField) {
+            instructionsField.setAttribute('data-task-index', index);
+          }
+          // Buscar campo de imagen dentro del contenedor de la tarea
+          let imageField = null;
+          if (task && task.workPlanTaskId) {
+            imageField = item.querySelector(`.task-image-input[data-work-plan-task-id="${task.workPlanTaskId}"]`);
+          }
+          if (!imageField) {
+            imageField = item.querySelector(`.task-image-input[data-task-id="${taskId}"]`);
+          }
+          if (imageField) {
+            imageField.setAttribute('data-task-index', index);
+          }
+          const configPanel = item.querySelector('.task-config-panel');
+          if (configPanel) {
+            configPanel.setAttribute('data-config-panel', index);
+          }
+          const toggleBtn = item.querySelector('.toggle-config-btn');
+          if (toggleBtn) {
+            toggleBtn.setAttribute('data-task-index', index);
+          }
+        }
+      });
+    }
+    
+    // Generar hidden fields para el formulario
+    function generateHiddenFields() {
+      if (!hiddenFieldsContainer) return;
+      
+      hiddenFieldsContainer.innerHTML = '';
+      
+      planTasks.forEach((task, index) => {
+        // Campo para task_id
+        const taskIdField = document.createElement('input');
+        taskIdField.type = 'hidden';
+        taskIdField.name = `work_plan[work_plan_tasks_attributes][${index}][task_id]`;
+        taskIdField.value = task.id;
+        hiddenFieldsContainer.appendChild(taskIdField);
+        
+        // Campo para position
+        const positionField = document.createElement('input');
+        positionField.type = 'hidden';
+        positionField.name = `work_plan[work_plan_tasks_attributes][${index}][position]`;
+        positionField.value = index;
+        hiddenFieldsContainer.appendChild(positionField);
+        
+        // Campo para work_plan_task_id (si existe, para updates)
+        if (task.workPlanTaskId) {
+          const workPlanTaskIdField = document.createElement('input');
+          workPlanTaskIdField.type = 'hidden';
+          workPlanTaskIdField.name = `work_plan[work_plan_tasks_attributes][${index}][id]`;
+          workPlanTaskIdField.value = task.workPlanTaskId;
+          hiddenFieldsContainer.appendChild(workPlanTaskIdField);
+        }
+        
+        // Campo para instructions
+        const instructionsField = document.querySelector(`.task-instructions[data-task-id="${task.id}"]`);
+        if (instructionsField) {
+          const instructionsHiddenField = document.createElement('input');
+          instructionsHiddenField.type = 'hidden';
+          instructionsHiddenField.name = `work_plan[work_plan_tasks_attributes][${index}][instructions]`;
+          instructionsHiddenField.value = instructionsField.value;
+          hiddenFieldsContainer.appendChild(instructionsHiddenField);
+        }
+        
+        // Campo para image (file input)
+        // IMPORTANTE: Los file inputs NO se pueden clonar, deben mantenerse en su lugar
+        // Solo actualizamos el nombre del campo existente
+        // Buscar dentro del contenedor específico de la tarea usando el índice
+        const taskItem = planTasksContainer.querySelector(`.plan-task-item[data-task-index="${index}"]`);
+        let imageField = null;
+        
+        if (taskItem) {
+          // Buscar por workPlanTaskId primero (si existe), luego por taskId dentro del contenedor de la tarea
+          if (task.workPlanTaskId) {
+            imageField = taskItem.querySelector(`.task-image-input[data-work-plan-task-id="${task.workPlanTaskId}"]`);
+          }
+          if (!imageField) {
+            imageField = taskItem.querySelector(`.task-image-input[data-task-id="${task.id}"]`);
+          }
+        }
+        
+        if (imageField) {
+          // Actualizar el nombre del campo directamente (no clonar)
+          imageField.name = `work_plan[work_plan_tasks_attributes][${index}][image]`;
+          // Actualizar el índice de tarea
+          imageField.setAttribute('data-task-index', index);
+          // Si hay un workPlanTaskId, también necesitamos mantener la referencia
+          if (task.workPlanTaskId) {
+            imageField.setAttribute('data-work-plan-task-id', task.workPlanTaskId);
+          }
+        }
+      });
+    }
+    
+    // Actualizar hidden fields cuando cambian los valores
+    function setupTaskConfigListeners() {
+      // Listeners para instrucciones
+      document.querySelectorAll('.task-instructions').forEach(field => {
+        field.addEventListener('input', function() {
+          generateHiddenFields();
+        });
+      });
+      
+      // Listeners para imágenes
+      document.querySelectorAll('.task-image-input').forEach(field => {
+        field.addEventListener('change', function() {
+          generateHiddenFields();
+          // Mostrar preview de la imagen seleccionada
+          if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const preview = document.createElement('div');
+              preview.className = 'mb-2';
+              preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                <br>
+                <small class="text-muted">Nueva imagen seleccionada</small>
+              `;
+              const existingPreview = field.parentElement.querySelector('.mb-2');
+              if (existingPreview) {
+                existingPreview.remove();
+              }
+              field.parentElement.insertBefore(preview, field);
+            };
+            reader.readAsDataURL(this.files[0]);
+          }
+        });
+      });
+    }
+    
+    // Crear elemento de tarea en el plan
+    function createPlanTaskElement(task, index) {
+      const div = document.createElement('div');
+      div.className = 'task-card card border-primary plan-task-item';
+      div.setAttribute('data-task-id', task.id);
+      div.setAttribute('data-task-type', task.taskType);
+      div.setAttribute('data-task-index', index !== undefined ? index : planTasks.length);
+      div.setAttribute('draggable', 'true');
+      div.style.cursor = 'move';
+      
+      if (task.workPlanTaskId) {
+        div.setAttribute('data-work-plan-task-id', task.workPlanTaskId);
+      }
+      
+      const taskIndex = index !== undefined ? index : planTasks.length;
+      // Normalizar taskType para comparación (por si acaso hay espacios o diferencias)
+            const normalizedTaskType = (task.taskType || '').trim().toLowerCase();
+            const needsInstructions = normalizedTaskType === 'photo_capture' || normalizedTaskType === 'comment_capture' || normalizedTaskType === 'image_display' || normalizedTaskType === 'incident_report' || normalizedTaskType === 'inventory_capture';
+            const needsImage = normalizedTaskType === 'image_display';
+      
+      let configPanelHTML = '';
+      if (needsInstructions || needsImage) {
+        configPanelHTML = `
+          <div class="task-config-panel border-top pt-3 mt-2" style="display: none;" data-config-panel="${taskIndex}">
+            ${needsInstructions ? `
+              <div class="mb-3">
+                <label class="form-label fw-bold">Instrucciones para el Promotor:</label>
+                <textarea class="form-control task-instructions" 
+                          rows="3" 
+                          data-task-id="${task.id}"
+                          data-task-index="${taskIndex}"
+                          placeholder="Ej: Por favor registra tus comentarios sobre la nueva promoción en pasillos">${task.instructions || ''}</textarea>
+                <small class="form-text text-muted">Escribe las instrucciones que verá el promotor al ejecutar esta tarea</small>
+              </div>
+            ` : ''}
+            ${needsImage ? `
+              <div class="mb-3">
+                <label class="form-label fw-bold">Imagen a mostrar:</label>
+                ${task.hasImage && task.imageUrl ? `
+                  <div class="mb-2">
+                    <img src="${task.imageUrl}" alt="Imagen actual" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                    <br>
+                    <small class="text-muted">Imagen actual</small>
+                  </div>
+                ` : ''}
+                <input type="file" 
+                       class="form-control task-image-input" 
+                       accept="image/*"
+                       data-task-id="${task.id}"
+                       data-task-index="${taskIndex}"
+                       ${task.workPlanTaskId ? `data-work-plan-task-id="${task.workPlanTaskId}"` : ''}>
+                <small class="form-text text-muted">Selecciona la imagen que verá el promotor</small>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      
+      div.innerHTML = `
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center flex-grow-1">
+              <i class="bi bi-grip-vertical text-primary me-2"></i>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">${task.name}</h6>
+              </div>
+            </div>
+            <div>
+              ${needsInstructions || needsImage ? `
+                <button type="button" class="btn btn-sm btn-outline-info toggle-config-btn me-2" data-task-index="${taskIndex}">
+                  <i class="bi bi-gear"></i> Configurar
+                </button>
+              ` : ''}
+              <button type="button" class="btn btn-sm btn-outline-danger remove-task-btn" data-task-id="${task.id}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+          ${configPanelHTML}
+        </div>
+      `;
+      
+      // Event listener para eliminar
+      const removeBtn = div.querySelector('.remove-task-btn');
+      removeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        removeTask(task.id);
+      });
+      
+      // El event listener para toggle config se maneja con delegación de eventos más abajo
+      
+      // Event listeners para drag & drop
+      div.addEventListener('dragstart', handleDragStart);
+      div.addEventListener('dragover', handleDragOver);
+      div.addEventListener('drop', handleDrop);
+      div.addEventListener('dragend', handleDragEnd);
+      
+      return div;
+    }
+    
+    // Toggle panel de configuración
+    function toggleTaskConfig(taskIndex) {
+      // Buscar el panel dentro del contenedor de tareas del plan
+      const taskItem = planTasksContainer.querySelector(`.plan-task-item[data-task-index="${taskIndex}"]`);
+      if (!taskItem) {
+        console.error('Task item not found for index:', taskIndex);
+        return;
+      }
+      
+      const panel = taskItem.querySelector('.task-config-panel');
+      const btn = taskItem.querySelector('.toggle-config-btn');
+      
+      if (panel && btn) {
+        const isVisible = panel.style.display !== 'none' && panel.style.display !== '';
+        panel.style.display = isVisible ? 'none' : 'block';
+        const icon = isVisible ? 'bi-gear' : 'bi-gear-fill';
+        const text = isVisible ? 'Configurar' : 'Ocultar';
+        btn.innerHTML = `<i class="bi ${icon}"></i> ${text}`;
+      } else {
+        console.error('Panel or button not found. Panel:', panel, 'Button:', btn);
+      }
+    }
+    
+    // Agregar tarea al plan
+    function addTaskToPlan(taskId) {
+      const taskCard = availableTasksContainer.querySelector(`[data-task-id="${taskId}"]`);
+      if (!taskCard) return;
+      
+      // Verificar si ya existe
+      if (planTasks.some(t => t.id == taskId)) {
+        alert('Esta tarea ya está en el plan');
+        return;
+      }
+      
+      // Obtener información de la tarea
+      const taskNameElement = taskCard.querySelector('h6');
+      if (!taskNameElement) {
+        console.error('Task name element not found');
+        return;
+      }
+      
+      const taskName = taskNameElement.textContent;
+      const taskType = taskCard.getAttribute('data-task-type'); // Obtener del atributo data
+      
+      if (!taskType) {
+        console.error('Task type not found for task:', taskId);
+        return;
+      }
+      
+      const task = {
+        id: parseInt(taskId),
+        name: taskName,
+        taskType: taskType
+      };
+      
+      planTasks.push(task);
+      
+      const element = createPlanTaskElement(task);
+      planTasksContainer.appendChild(element);
+      
+      // Actualizar índices de todas las tareas
+      updateTaskIndices();
+      
+      updateUI();
+      
+      // Re-configurar listeners después de agregar
+      setTimeout(() => {
+        setupTaskConfigListeners();
+      }, 50);
+    }
+    
+    // Remover tarea del plan
+    function removeTask(taskId) {
+      planTasks = planTasks.filter(t => t.id != taskId);
+      const element = planTasksContainer.querySelector(`[data-task-id="${taskId}"]`);
+      if (element) {
+        element.remove();
+      }
+      updateUI();
+    }
+    
+    // Drag & Drop handlers
+    function handleDragStart(e) {
+      draggedElement = this;
+      this.style.opacity = '0.5';
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+    
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+    
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      
+      if (draggedElement !== this) {
+        // Si viene del área de disponibles, agregar al plan
+        if (draggedElement.classList.contains('task-available')) {
+          const taskId = draggedElement.getAttribute('data-task-id');
+          addTaskToPlan(taskId);
+        } else {
+          // Reordenar dentro del plan
+          const allTasks = Array.from(planTasksContainer.querySelectorAll('.plan-task-item'));
+          const draggedIndex = Array.from(allTasks).indexOf(draggedElement);
+          const targetIndex = Array.from(allTasks).indexOf(this);
+          
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+            const draggedTask = planTasks[draggedIndex];
+            planTasks.splice(draggedIndex, 1);
+            planTasks.splice(targetIndex, 0, draggedTask);
+            
+            // Reordenar DOM
+            if (draggedIndex < targetIndex) {
+              this.parentNode.insertBefore(draggedElement, this.nextSibling);
+            } else {
+              this.parentNode.insertBefore(draggedElement, this);
+            }
+            
+            updateUI();
+          }
+        }
+      }
+      
+      return false;
+    }
+    
+    function handleDragEnd(e) {
+      this.style.opacity = '1';
+      draggedElement = null;
+    }
+    
+    // Configurar drag & drop en tareas disponibles
+    if (availableTasksContainer) {
+      availableTasksContainer.querySelectorAll('.task-available').forEach(card => {
+        card.addEventListener('dragstart', handleDragStart);
+        card.addEventListener('dragend', handleDragEnd);
+      });
+    }
+    
+    // Configurar drop zone en el plan
+    if (planTasksContainer) {
+      planTasksContainer.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+      
+      planTasksContainer.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (draggedElement && draggedElement.classList.contains('task-available')) {
+          const taskId = draggedElement.getAttribute('data-task-id');
+          addTaskToPlan(taskId);
+        }
+      });
+    }
+    
+    // Configurar listeners para botones de toggle (usando delegación de eventos)
+    document.addEventListener('click', function(e) {
+      const toggleBtn = e.target.closest('.toggle-config-btn');
+      if (toggleBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const taskIndex = toggleBtn.getAttribute('data-task-index');
+        if (taskIndex !== null) {
+          toggleTaskConfig(parseInt(taskIndex));
+        } else {
+          console.error('Task index not found on button');
+        }
+      }
+    });
+    
+    // Configurar filtrado de formatos por cadena
+    const chainSelector = document.getElementById('chain-selector');
+    const formatSelector = document.getElementById('format-selector');
+    
+    // Datos de formatos agrupados por cadena
+    const formatsByChain = {};
+    <% @available_formats.each do |format| %>
+      (function() {
+        const formatChainId = <%= format.chain_id %>;
+        if (!formatsByChain[formatChainId]) {
+          formatsByChain[formatChainId] = [];
+        }
+        formatsByChain[formatChainId].push({
+          id: <%= format.id %>,
+          name: '<%= j(format.name) %>'
+        });
+      })();
+    <% end %>
+    
+    // Debug: mostrar estructura de formatos
+    console.log('Formats by chain:', formatsByChain);
+    
+    // Función para filtrar formatos según la cadena seleccionada
+    function filterFormatsByChain(selectedChainId) {
+      if (!formatSelector) {
+        console.error('Format selector not found');
+        return;
+      }
+      
+      // Convertir selectedChainId a número si es string
+      const chainIdNum = selectedChainId ? parseInt(selectedChainId) : null;
+      
+      console.log('Filtering formats for chain ID:', chainIdNum);
+      console.log('Available formats for this chain:', chainIdNum ? formatsByChain[chainIdNum] : 'all');
+      
+      // Limpiar selector de formatos
+      formatSelector.innerHTML = '<option value="">Selecciona un formato (opcional)</option>';
+      
+      if (chainIdNum && formatsByChain[chainIdNum]) {
+        // Agregar formatos de la cadena seleccionada
+        formatsByChain[chainIdNum].forEach(format => {
+          const option = document.createElement('option');
+          option.value = format.id;
+          option.textContent = format.name;
+          formatSelector.appendChild(option);
+        });
+        
+        console.log('Added', formatsByChain[chainIdNum].length, 'formats for chain', chainIdNum);
+        
+        // Si hay un formato pre-seleccionado y pertenece a esta cadena, seleccionarlo
+        <% if @work_plan.format_id.present? %>
+          const preselectedFormatId = <%= @work_plan.format_id %>;
+          const preselectedOption = formatSelector.querySelector(`option[value="${preselectedFormatId}"]`);
+          if (preselectedOption) {
+            preselectedOption.selected = true;
+            console.log('Preselected format:', preselectedFormatId);
+          }
+        <% end %>
+      } else if (!chainIdNum) {
+        // Si no hay cadena seleccionada, mostrar todos los formatos con su cadena
+        <% @available_formats.each do |format| %>
+          (function() {
+            const formatOption = document.createElement('option');
+            formatOption.value = <%= format.id %>;
+            formatOption.textContent = '<%= j(format.name_with_chain) %>';
+            <% if @work_plan.format_id == format.id %>
+              formatOption.selected = true;
+            <% end %>
+            formatSelector.appendChild(formatOption);
+          })();
+        <% end %>
+        console.log('Added all formats (no chain selected)');
+      } else {
+        console.warn('Chain ID', chainIdNum, 'not found in formatsByChain');
+      }
+    }
+    
+    // Event listener para el selector de cadena
+    if (chainSelector && formatSelector) {
+      console.log('Chain selector found:', chainSelector);
+      console.log('Format selector found:', formatSelector);
+      
+      // Inicializar con la cadena seleccionada (si existe)
+      <% if @work_plan.format&.chain_id.present? %>
+        const initialChainId = <%= @work_plan.format.chain_id %>;
+        console.log('Initializing with chain ID:', initialChainId);
+        filterFormatsByChain(initialChainId);
+      <% else %>
+        // Si no hay cadena pre-seleccionada, mostrar todos los formatos
+        console.log('No initial chain, showing all formats');
+        filterFormatsByChain(null);
+      <% end %>
+      
+      chainSelector.addEventListener('change', function() {
+        const selectedChainId = this.value;
+        console.log('Chain changed to:', selectedChainId);
+        console.log('Available formats for this chain:', formatsByChain[parseInt(selectedChainId)]);
+        filterFormatsByChain(selectedChainId);
+        // Limpiar la selección de formato cuando cambia la cadena
+        formatSelector.value = '';
+      });
+    } else {
+      console.error('Chain selector or format selector not found!', {
+        chainSelector: chainSelector,
+        formatSelector: formatSelector
+      });
+    }
+    
+    // Inicializar UI
+    updateUI();
+    setupTaskConfigListeners();
+    
+    // Re-configurar listeners después de agregar tareas
+    const originalAddTaskToPlan = addTaskToPlan;
+    addTaskToPlan = function(taskId) {
+      originalAddTaskToPlan(taskId);
+      setTimeout(() => {
+        setupTaskConfigListeners();
+        updateTaskIndices();
+      }, 100);
+    };
+    
+    // IMPORTANTE: Actualizar nombres de file inputs antes de enviar el formulario
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        console.log('=== SUBMIT DEL FORMULARIO ===');
+        console.log('Total de tareas:', planTasks.length);
+        
+        // Asegurar que todos los file inputs tengan el nombre correcto
+        planTasks.forEach((task, index) => {
+          // Buscar dentro del contenedor específico de la tarea usando el índice
+          const taskItem = planTasksContainer.querySelector(`.plan-task-item[data-task-index="${index}"]`);
+          let imageField = null;
+          
+          if (taskItem) {
+            // Buscar por workPlanTaskId primero (si existe), luego por taskId dentro del contenedor de la tarea
+            if (task.workPlanTaskId) {
+              imageField = taskItem.querySelector(`.task-image-input[data-work-plan-task-id="${task.workPlanTaskId}"]`);
+            }
+            if (!imageField) {
+              imageField = taskItem.querySelector(`.task-image-input[data-task-id="${task.id}"]`);
+            }
+          }
+          
+          if (imageField) {
+            const hasFile = imageField.files && imageField.files.length > 0;
+            console.log(`Task ${index} (ID: ${task.id}, WorkPlanTaskID: ${task.workPlanTaskId}):`, {
+              found: true,
+              hasFile: hasFile,
+              fileName: hasFile ? imageField.files[0].name : 'N/A',
+              oldName: imageField.name,
+              newName: `work_plan[work_plan_tasks_attributes][${index}][image]`
+            });
+            imageField.name = `work_plan[work_plan_tasks_attributes][${index}][image]`;
+            imageField.setAttribute('data-task-index', index);
+          } else {
+            console.log(`Task ${index} (ID: ${task.id}): NO SE ENCONTRÓ FILE INPUT`);
+          }
+        });
+        
+        // Generar hidden fields antes de enviar
+        generateHiddenFields();
+        
+        // Verificar que el formulario tenga multipart
+        if (!form.enctype || form.enctype !== 'multipart/form-data') {
+          console.warn('ADVERTENCIA: El formulario NO tiene enctype="multipart/form-data"');
+          form.enctype = 'multipart/form-data';
+        }
+      });
+    }
+  })();
+</script>

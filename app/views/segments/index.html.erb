@@ -1,0 +1,28 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Segmentos" do %>
+  <%= link_to new_segment_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Segmento
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de segmentos (componente reutilizable) %>
+<div class="row g-3">
+  <% if @segments.any? %>
+    <% @segments.each do |segment| %>
+      <%= render 'shared/catalog_card',
+          item: segment,
+          title: segment.name,
+          subtitle: "#{segment.stores.count} tienda(s) asignada(s)",
+          avatar_letter: segment.name.first.upcase,
+          avatar_color: "primary",
+          edit_path: edit_segment_path(segment) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-diagram-3",
+        message: "No hay segmentos registrados aún." %>
+  <% end %>
+</div>

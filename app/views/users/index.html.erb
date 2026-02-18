@@ -1,0 +1,29 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Usuarios" do %>
+  <%= link_to new_user_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Usuario
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de usuarios (componente reutilizable) %>
+<div class="row g-3">
+  <% if @users.any? %>
+    <% @users.each do |user| %>
+      <%= render 'shared/catalog_card',
+          item: user,
+          title: user.name,
+          subtitle: role_name(user.role),
+          avatar_letter: user.name.first.upcase,
+          avatar_color: "primary",
+          use_generic_avatar: true,
+          edit_path: edit_user_path(user) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-people",
+        message: "No hay usuarios registrados aún." %>
+  <% end %>
+</div>

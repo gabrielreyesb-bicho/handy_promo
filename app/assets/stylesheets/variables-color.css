@@ -1,0 +1,286 @@
+/* variables-color.css ver. 1.1.0 */
+
+:root {
+   --white: 255, 255, 255;
+   --dark: 31, 41, 51;
+   --primary: 10, 146, 246;
+   --secondary: 100, 116, 119;
+   --tertiary: 44, 80, 124;
+   --success: 32, 176, 98;
+   --danger: 250, 80, 83;
+   --warning: 255, 179, 76;
+   --info: 57, 167, 248;
+   --blue: 10, 146, 246;
+   --green: 32, 176, 98;
+   --yellow: 255, 179, 76;
+   --red: 250, 80, 83;
+   --teal: 13, 148, 136;
+
+   --padding-wrap: 20px;
+   --margin-negative-wrap: -20px;
+
+   --font-family: 'Roboto', sans-serif;
+
+   /* COLOR PRIMARY BLUE */
+   --color-primary-blue-10: #F0F8FE;
+   --color-primary-blue-20: #DEF0FE;
+   --color-primary-blue-30: #98D1FB;
+   --color-primary-blue-40: #68BCFA;
+   --color-primary-blue-50: #39A7F8;
+   --color-primary-blue-60: #0A92F6;
+   --color-primary-blue-70: #0876C7;
+   --color-primary-blue-80: #065A98;
+   --color-primary-blue-90: #043E69;
+   --color-primary-blue-100: #02223A;
+   --color-brand-blue: var(--color-primary-blue-60);
+
+   /* COLOR PRIMARY GREEN */
+   --color-primary-green-10: #F6FDF9;
+   --color-primary-green-20: #E9FAF1;
+   --color-primary-green-30: #D3F4E3;
+   --color-primary-green-40: #A8EAC6;
+   --color-primary-green-50: #7CDFAA;
+   --color-primary-green-60: #25CA71;
+   --color-primary-green-70: #1EA25A;
+   --color-primary-green-80: #167944;
+   --color-primary-green-90: #0F512D;
+   --color-primary-green-100: #072817;
+   --color-brand-green: var(--color-primary-green-60);
+
+   /* COLOR SECONDARY RED */
+   --color-secondary-red-10: #FFF4F5;
+   --color-secondary-red-20: #FEEDEE;
+   --color-secondary-red-30: #FDCACB;
+   --color-secondary-red-40: #FC9698;
+   --color-secondary-red-50: #FB7375;
+   --color-secondary-red-60: #FA5053;
+   --color-secondary-red-70: #CF4043;
+   --color-secondary-red-80: #782122;
+   --color-secondary-red-90: #4C1112;
+   --color-secondary-red-100: #37090A;
+   --color-brand-red: var(--color-secondary-red-60);
+
+   /* COLOR SECONDARY YELLOW */
+   --color-secondary-yellow-10: #FFFAF4;
+   --color-secondary-yellow-20: #FFF7EC;
+   --color-secondary-yellow-30: #FFE8C7;
+   --color-secondary-yellow-40: #FFD18E;
+   --color-secondary-yellow-50: #FFC269;
+   --color-secondary-yellow-60: #FFB343;
+   --color-secondary-yellow-70: #D19236;
+   --color-secondary-yellow-80: #76511B;
+   --color-secondary-yellow-90: #48310D;
+   --color-secondary-yellow-100: #312007;
+   --color-brand-yellow: var(--color-secondary-yellow-60);
+
+   /* COLOR SECONDARY ROYAL BLUE */
+   --color-secondary-royal-10: #F0F5FC;
+   --color-secondary-royal-20: #DCE9FA;
+   --color-secondary-royal-30: #ABC9F0;
+   --color-secondary-royal-40: #6298E0;
+   --color-secondary-royal-50: #3178D6;
+   --color-secondary-royal-60: #0058CC;
+   --color-secondary-royal-70: #0046A3;
+   --color-secondary-royal-80: #002352;
+   --color-secondary-royal-90: #001229;
+   --color-secondary-royal-100: #000914;
+   --color-brand-royal: var(--color-secondary-royal-60);
+
+   /* COLOR NEUTRAL */
+   --color-neutral-white: #FFFFFF;
+   --color-neutral-10: #F6F8FC;
+   --color-neutral-20: #F1F4F9;
+   --color-neutral-30: #E2E8F0;
+   --color-neutral-40: #CBD4E1;
+   --color-neutral-50: #94A3B8;
+   --color-neutral-60: #64748B;
+   --color-neutral-70: #475569;
+   --color-neutral-80: #27364B;
+   --color-neutral-90: #1E2A3B;
+   --color-neutral-100: #0F1A2A;
+}
+
+@media (max-width: 1536px) {
+   :root {
+      --padding-wrap: 16px;
+      --margin-negative-wrap: -16px;
+   }
+}
+
+@media (max-width: 576px) {
+   :root {
+      --padding-wrap: 16px;
+      --margin-negative-wrap: -16px;
+   }
+}
+
+
+html[data-theme="light"] {
+   --text-base: 15, 26, 42;
+   --text-secondary: 100, 116, 139;
+   --text-muted: 148, 163, 184;
+   --border-components: 203, 213, 225;
+   --border: 226, 232, 240;
+   --icons: 148, 163, 184;
+   --bg-body: 246, 248, 252;
+   --bg-base: 255, 255, 255;
+   --bg-components: 241, 244, 249;
+   --shadow-color: 51, 65, 85;
+   --element-shadow-xs: 0px 6px 10px -6px rgba(var(--shadow-color), .3);
+   --element-shadow-sm: 0px 10px 10px -6px rgba(var(--shadow-color), .15);
+   --element-shadow-lg: 0px 10px 30px rgba(var(--shadow-color), .3);
+
+   /* TEXT COLORS */
+   --color-text-primary: var(--color-brand-blue);
+   --color-text-base: var(--color-neutral-100);
+   --color-text-secondary: var(--color-neutral-60);
+   --color-text-muted: var(--color-neutral-50);
+   --color-text-success: var(--color-primary-green-70);
+   --color-text-danger: var(--color-secondary-red-70);
+   --color-text-warning: var(--color-secondary-yellow-60);
+   --color-text-on-primary: var(--color-neutral-white);
+   --color-text-on-info-soft: var(--color-primary-blue-70);
+   --color-text-on-success: var(--color-neutral-white);
+   --color-text-on-success-soft: var(--color-primary-green-80);
+   --color-text-on-danger: var(--color-neutral-white);
+   --color-text-on-danger-soft: var(--color-secondary-red-70);
+   --color-text-on-warning: var(--color-secondary-yellow-90);
+   --color-text-on-warning-soft: var(--color-secondary-yellow-70);
+
+   /* BACKGROUNDS COLORS */
+   --color-bg-base: var(--color-neutral-white);
+   --color-bg-body: var(--color-neutral-10);
+   --color-bg-components: var(--color-neutral-20);
+   --color-bg-table-head: var(--color-neutral-20);
+   --color-bg-row-disabled: var(--color-neutral-30);
+   --color-bg-disabled: var(--color-neutral-20);
+   --color-bg-badge: var(--color-neutral-30);
+   --color-bg-neutral-hover: var(--color-neutral-60);
+   --color-bg-primary: var(--color-brand-blue);
+   --color-bg-primary-hover: var(--color-primary-blue-70);
+   --color-bg-info: var(--color-primary-blue-50);
+   --color-bg-info-soft: var(--color-primary-blue-20);
+   --color-bg-success: var(--color-primary-green-70);
+   --color-bg-success-hover: var(--color-primary-green-80);
+   --color-bg-success-soft: var(--color-primary-green-30);
+   --color-bg-danger: var(--color-secondary-red-60);
+   --color-bg-danger-hover: var(--color-secondary-red-70);
+   --color-bg-danger-soft: var(--color-secondary-red-30);
+   --color-bg-warning: var(--color-secondary-yellow-60);
+   --color-bg-warning-hover: var(--color-secondary-yellow-70);
+   --color-bg-warning-soft: var(--color-secondary-yellow-30);
+
+   /* BORDERS COLORS */
+   --color-border: var(--color-neutral-30);
+   --color-border-components: var(--color-neutral-40);
+   --color-border-components-primary: var(--color-primary-blue-50);
+   --color-border-components-success: var(--color-primary-green-70);
+   --color-border-components-danger: var(--color-secondary-red-50);
+   --color-border-components-warning: var(--color-secondary-yellow-50);
+   --color-border-left-card-disabled: var(--color-neutral-50);
+   --color-border-left-card-success: var(--color-primary-green-60);
+   --color-border-left-card-info: var(--color-primary-blue-50);
+   --color-border-left-card-danger: var(--color-secondary-red-60);
+   --color-border-left-card-warning: var(--color-secondary-yellow-60);
+
+   /* ICONOS COLORS */
+   --color-icon: var(--color-neutral-100);
+   --color-icon-on: var(--color-neutral-white);
+   --color-icon-soft: var(--color-neutral-50);
+   --color-icon-primary: var(--color-brand-blue);
+   --color-icon-success: var(--color-primary-green-60);
+   --color-icon-danger: var(--color-secondary-red-60);
+   --color-icon-warning: var(--color-secondary-yellow-60);
+}
+
+html[data-theme="dark"] {
+   --text-base: 242, 248, 252;
+   --text-secondary: 148, 163, 184;
+   --text-muted: 100, 116, 139;
+   --border-components: 56, 70, 84;
+   --border: 71, 85, 105;
+   --icons: 82, 96, 109;
+   --bg-body: 15, 26, 42;
+   --bg-base: 30, 42, 59;
+   --bg-components: 39, 54, 75;
+   --shadow-color: 0, 0, 0;
+   --element-shadow-sm: 0px 8px 10px -4px rgba(var(--shadow-color), .25);
+   --element-shadow-lg: 0px 10px 20px rgba(var(--shadow-color), .35);
+
+   /* TEXT COLORS */
+   --color-text-primary: var(--color-brand-blue);
+   --color-text-base: var(--color-neutral-10);
+   --color-text-secondary: var(--color-neutral-50);
+   --color-text-muted: var(--color-neutral-60);
+   --color-text-success: var(--color-primary-green-70);
+   --color-text-danger: var(--color-secondary-red-60);
+   --color-text-warning: var(--color-secondary-yellow-60);
+   --color-text-on-primary: var(--color-neutral-white);
+   --color-text-on-info-soft: var(--color-neutral-white);
+   --color-text-on-success: var(--color-neutral-white);
+   --color-text-on-success-soft: var(--color-neutral-white);
+   --color-text-on-danger: var(--color-neutral-white);
+   --color-text-on-danger-soft: var(--color-neutral-white);
+   --color-text-on-warning: var(--color-neutral-white);
+   --color-text-on-warning-soft: var(--color-neutral-white);
+
+   /* BACKGROUNDS COLORS */
+   --color-bg-base: var(--color-neutral-90);
+   --color-bg-body: var(--color-neutral-100);
+   --color-bg-components: var(--color-neutral-80);
+   --color-bg-table-head: var(--color-neutral-80);
+   --color-bg-row-disabled: var(--color-neutral-80);
+   --color-bg-disabled: var(--color-neutral-80);
+   --color-bg-badge: var(--color-neutral-70);
+   --color-bg-neutral-hover: var(--color-neutral-50);
+   --color-bg-primary: var(--color-brand-blue);
+   --color-bg-primary-hover: var(--color-primary-blue-70);
+   --color-bg-info: var(--color-primary-blue-80);
+   --color-bg-info-soft: var(--color-primary-blue-80);
+   --color-bg-success: var(--color-primary-green-70);
+   --color-bg-success-hover: var(--color-primary-green-80);
+   --color-bg-success-soft: var(--color-primary-green-80);
+   --color-bg-danger: var(--color-secondary-red-70);
+   --color-bg-danger-hover: var(--color-secondary-red-80);
+   --color-bg-danger-soft: var(--color-secondary-red-70);
+   --color-bg-warning: var(--color-secondary-yellow-70);
+   --color-bg-warning-hover: var(--color-secondary-yellow-80);
+   --color-bg-warning-soft: var(--color-secondary-yellow-70);
+
+   /* BORDERS COLORS */
+   --color-border: var(--color-neutral-70);
+   --color-border-components: var(--color-neutral-70);
+   --color-border-components-primary: var(--color-primary-blue-70);
+   --color-border-components-success: var(--color-primary-green-70);
+   --color-border-components-danger: var(--color-secondary-red-70);
+   --color-border-components-warning: var(--color-secondary-yellow-70);
+   --color-border-left-card-disabled: var(--color-neutral-50);
+   --color-border-left-card-success: var(--color-primary-green-70);
+   --color-border-left-card-info: var(--color-primary-blue-50);
+   --color-border-left-card-danger: var(--color-secondary-red-60);
+   --color-border-left-card-warning: var(--color-secondary-yellow-60);
+
+   /* ICONS COLORS */
+   --color-icon: var(--color-neutral-10);
+   --color-icon-on: var(--color-neutral-white);
+   --color-icon-soft: var(--color-neutral-50);
+   --color-icon-primary: var(--color-brand-blue);
+   --color-icon-success: var(--color-primary-green-70);
+   --color-icon-danger: var(--color-secondary-red-60);
+   --color-icon-warning: var(--color-secondary-yellow-60);
+}
+
+/* Control Modo Claro - Oscruro */
+[data-theme='light'] .d-block-light,
+[data-theme='dark'] .d-block-dark {
+   display: flex !important;
+   cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+
+   [data-theme='light'] .d-block-light,
+   [data-theme='dark'] .d-block-dark {
+      display: block !important;
+   }
+}

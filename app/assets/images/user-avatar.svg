@@ -1,0 +1,8 @@
+<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fondo azul -->
+  <circle cx="30" cy="30" r="30" fill="#0A92F6"/>
+  <!-- Cabeza (cara) -->
+  <circle cx="30" cy="22" r="9" fill="white" stroke="#0876C7" stroke-width="1.5"/>
+  <!-- Cuerpo (hombros y torso) -->
+  <path d="M30 33C22.268 33 16 37.477 16 43V45H44V43C44 37.477 37.732 33 30 33Z" fill="white" stroke="#0876C7" stroke-width="1.5"/>
+</svg>

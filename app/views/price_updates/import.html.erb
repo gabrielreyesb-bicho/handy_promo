@@ -1,0 +1,120 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Importar Actualizaciones de Precios" do %>
+  <%= link_to price_updates_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-arrow-left me-2"></i> Volver
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Información sobre el formato %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-10">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Formato del Archivo Excel</h5>
+      </div>
+      <div class="card-body">
+        <p>El archivo Excel debe tener las siguientes columnas en la primera fila:</p>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Columna</th>
+              <th>Descripción</th>
+              <th>Requerido</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Codigo_Cadena</strong></td>
+              <td>Código único de la cadena (ej: "WAL", "SOR")</td>
+              <td><span class="badge bg-danger">Sí</span></td>
+            </tr>
+            <tr>
+              <td><strong>Codigo_Formato</strong></td>
+              <td>Código único del formato (ej: "WAL_SUP", "SOR_HIP")</td>
+              <td><span class="badge bg-danger">Sí</span></td>
+            </tr>
+            <tr>
+              <td><strong>Codigo_Producto</strong></td>
+              <td>Código único del producto en tu compañía</td>
+              <td><span class="badge bg-danger">Sí</span></td>
+            </tr>
+            <tr>
+              <td><strong>Codigo_Presentacion</strong></td>
+              <td>Código de la presentación (o barcode)</td>
+              <td><span class="badge bg-danger">Sí</span></td>
+            </tr>
+            <tr>
+              <td><strong>Nuevo_Precio</strong></td>
+              <td>Nuevo precio a aplicar (número decimal, ej: 25.50)</td>
+              <td><span class="badge bg-danger">Sí</span></td>
+            </tr>
+            <tr>
+              <td><strong>Notas</strong></td>
+              <td>Notas adicionales (opcional)</td>
+              <td><span class="badge bg-secondary">No</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="alert alert-warning mt-3">
+          <strong>Importante:</strong> Las actualizaciones se asignarán a <strong>todas las tiendas</strong> que coincidan con la combinación Codigo_Cadena+Codigo_Formato especificada.
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <%= link_to download_template_price_updates_path, class: "btn btn-success" do %>
+            <i class="bi bi-download me-2"></i> Descargar Plantilla Excel
+          <% end %>
+          <%= link_to "/docs/formato_excel_precios.md", target: "_blank", class: "btn btn-outline-info" do %>
+            <i class="bi bi-file-earmark-text me-2"></i> Ver Documentación Completa
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <%# Formulario de importación %>
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Subir Archivo Excel</h5>
+      </div>
+      <div class="card-body p-4">
+        <%= form_with url: process_import_price_updates_path, method: :post, local: true, multipart: true do |f| %>
+          <% if flash[:alert] %>
+            <div class="alert alert-danger">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+          
+          <% if flash[:import_errors] %>
+            <div class="alert alert-warning">
+              <h6 class="alert-heading">Errores encontrados:</h6>
+              <ul class="mb-0">
+                <% flash[:import_errors].each do |error| %>
+                  <li><%= error %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
+          <div class="mb-3">
+            <%= f.label :file, "Archivo Excel (.xlsx)", class: "form-label fw-bold" %>
+            <%= f.file_field :file, 
+                accept: ".xlsx,.xls", 
+                class: "form-control", 
+                required: true %>
+            <small class="form-text text-muted">Selecciona un archivo Excel con el formato especificado</small>
+          </div>
+          
+          <div class="d-flex justify-content-end gap-2">
+            <%= link_to price_updates_path, class: "btn btn-secondary" do %>
+              <i class="bi bi-x-circle me-2"></i> Cancelar
+            <% end %>
+            <%= f.submit "Importar Actualizaciones", class: "btn btn-primary" do %>
+              <i class="bi bi-upload me-2"></i> Importar
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<%# Ejemplo de cómo se vería la vista de Tiendas usando los mismos componentes %>
+
+<%# Barra de información / navegación (mismo componente) %>
+<%= render 'shared/view_header', title: "Tiendas" do %>
+  <%= link_to new_store_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Tienda
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (mismo componente) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de tiendas (mismo componente) %>
+<div class="row g-3">
+  <% if @stores.any? %>
+    <% @stores.each do |store| %>
+      <%= render 'shared/catalog_card',
+          item: store,
+          title: store.name,
+          subtitle: store.address,
+          avatar_letter: store.name.first.upcase,
+          avatar_color: "success" %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-shop",
+        message: "No hay tiendas registradas aún." %>
+  <% end %>
+</div>

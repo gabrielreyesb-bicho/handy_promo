@@ -1,0 +1,151 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Actualizaciones de Precios" do %>
+  <%= link_to new_price_update_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Nueva Actualización
+  <% end %>
+  <%= link_to import_price_updates_path, class: "btn btn-success" do %>
+    <i class="bi bi-upload me-2"></i> Importar desde Excel
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Filtros %>
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <%= form_with url: price_updates_path, method: :get, local: true, class: "row g-3" do |f| %>
+      <div class="col-md-3">
+        <%= f.select :status, 
+            options_for_select([
+              ['Todos', ''],
+              ['Pendientes', 'pending'],
+              ['Aplicadas', 'applied'],
+              ['Canceladas', 'cancelled']
+            ], params[:status]),
+            {},
+            { class: "form-select" } %>
+      </div>
+      <div class="col-md-3">
+        <%= f.select :store_id,
+            options_from_collection_for_select(current_company.stores.active.order(:name), :id, :name, params[:store_id]),
+            { prompt: "Todas las tiendas" },
+            { class: "form-select" } %>
+      </div>
+      <div class="col-md-4">
+        <%= f.submit "Filtrar", class: "btn btn-outline-primary" %>
+        <%= link_to "Limpiar", price_updates_path, class: "btn btn-outline-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%# Tabla de actualizaciones %>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <% if @price_updates.any? %>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Presentación</th>
+              <th>Nuevo Precio</th>
+              <th>Asignado a</th>
+              <th>Estado</th>
+              <th>Fecha Creación</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @price_updates.each do |price_update| %>
+              <tr>
+                <td>
+                  <strong><%= price_update.product_presentation.product.name %></strong>
+                  <br>
+                  <small class="text-muted"><%= price_update.product_presentation.product.code %></small>
+                </td>
+                <td>
+                  <%= price_update.product_presentation.full_name %>
+                </td>
+                <td>
+                  <strong class="text-success">$<%= number_with_delimiter(number_with_precision(price_update.new_price, precision: 2)) %></strong>
+                </td>
+                <td>
+                  <% if price_update.visit %>
+                    <div>
+                      <i class="bi bi-calendar-check me-1"></i>
+                      <strong>Visita:</strong> <%= price_update.visit.scheduled_date.strftime("%d/%m/%Y") %>
+                      <br>
+                      <small class="text-muted">
+                        <%= price_update.visit.store.name %> - <%= price_update.visit.user.name %>
+                      </small>
+                    </div>
+                  <% elsif price_update.store %>
+                    <div>
+                      <i class="bi bi-shop me-1"></i>
+                      <strong>Tienda:</strong> <%= price_update.store.name %>
+                      <br>
+                      <small class="text-muted"><%= price_update.store.chain.name %></small>
+                    </div>
+                  <% else %>
+                    <span class="text-muted">No asignado</span>
+                  <% end %>
+                </td>
+                <td>
+                  <% case price_update.status %>
+                  <% when 'pending' %>
+                    <span class="badge bg-warning">Pendiente</span>
+                  <% when 'applied' %>
+                    <span class="badge bg-success">Aplicada</span>
+                    <% if price_update.applied_at %>
+                      <br>
+                      <small class="text-muted"><%= price_update.applied_at.strftime("%d/%m/%Y") %></small>
+                    <% end %>
+                  <% when 'cancelled' %>
+                    <span class="badge bg-secondary">Cancelada</span>
+                  <% end %>
+                </td>
+                <td>
+                  <%= price_update.created_at.strftime("%d/%m/%Y") %>
+                  <br>
+                  <small class="text-muted"><%= price_update.created_at.strftime("%H:%M") %></small>
+                </td>
+                <td class="text-end">
+                  <div class="btn-group" role="group">
+                    <% if price_update.pending? %>
+                      <%= link_to apply_price_update_path(price_update), 
+                          method: :patch,
+                          data: { confirm: "¿Marcar esta actualización como aplicada?" },
+                          class: "btn btn-sm btn-outline-success" do %>
+                        <i class="bi bi-check-circle"></i>
+                      <% end %>
+                      <%= link_to cancel_price_update_path(price_update),
+                          method: :patch,
+                          data: { confirm: "¿Cancelar esta actualización?" },
+                          class: "btn btn-sm btn-outline-secondary" do %>
+                        <i class="bi bi-x-circle"></i>
+                      <% end %>
+                    <% end %>
+                    <%= link_to edit_price_update_path(price_update), class: "btn btn-sm btn-outline-primary" do %>
+                      <i class="bi bi-pencil"></i>
+                    <% end %>
+                    <%= link_to price_update_path(price_update), method: :delete,
+                        data: { confirm: "¿Estás seguro de eliminar esta actualización?" },
+                        class: "btn btn-sm btn-outline-danger" do %>
+                      <i class="bi bi-trash"></i>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <%= render 'shared/empty_state',
+          icon: "bi-currency-dollar",
+          message: "No hay actualizaciones de precios registradas aún." %>
+    <% end %>
+  </div>
+</div>

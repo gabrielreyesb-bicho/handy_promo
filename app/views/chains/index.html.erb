@@ -1,0 +1,30 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Cadenas" do %>
+  <%= link_to new_chain_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Cadena
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de cadenas (componente reutilizable) %>
+<div class="row g-3">
+  <% if @chains.any? %>
+    <% @chains.each do |chain| %>
+      <%= render 'shared/catalog_card',
+          item: chain,
+          title: chain.name,
+          subtitle: nil,
+          avatar_letter: chain.name.first.upcase,
+          avatar_color: "primary",
+          use_generic_avatar: true,
+          generic_avatar: 'chain-avatar.svg',
+          edit_path: edit_chain_path(chain) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-shop-window",
+        message: "No hay cadenas registradas aún." %>
+  <% end %>
+</div>

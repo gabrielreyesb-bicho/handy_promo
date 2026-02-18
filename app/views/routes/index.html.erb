@@ -1,0 +1,28 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Rutas" do %>
+  <%= link_to new_route_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Ruta
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de rutas (componente reutilizable) %>
+<div class="row g-3">
+  <% if @routes.any? %>
+    <% @routes.each do |route| %>
+      <%= render 'shared/catalog_card',
+          item: route,
+          title: route.name,
+          subtitle: "#{route.stores.count} tienda(s) asignada(s)",
+          avatar_letter: route.name.first.upcase,
+          avatar_color: "primary",
+          edit_path: edit_route_path(route) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-map",
+        message: "No hay rutas registradas aún." %>
+  <% end %>
+</div>

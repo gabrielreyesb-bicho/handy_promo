@@ -1,0 +1,84 @@
+<%# Partial reutilizable para tarjetas de catálogo %>
+<%# Uso: render 'shared/catalog_card', item: obj, title: "Título", subtitle: "Subtítulo", avatar_letter: "A", avatar_color: "primary", edit_path: edit_user_path(obj) %>
+<%
+  avatar_color ||= "primary"
+  avatar_letter ||= title.first.upcase
+  item_id ||= item&.id
+%>
+<div class="col-md-6">
+  <% if edit_path.present? %>
+    <%= link_to edit_path, class: "text-decoration-none text-reset" do %>
+      <div class="card shadow-sm catalog-card catalog-card-clickable">
+        <div class="card-body">
+          <%# Avatar %>
+          <div class="catalog-item-avatar">
+            <% if defined?(avatar_image) && avatar_image.present? %>
+              <div class="avatar-circle bg-<%= avatar_color %>" style="background-image: url('<%= avatar_image %>'); background-size: cover; background-position: center;">
+              </div>
+            <% elsif defined?(use_generic_avatar) && use_generic_avatar %>
+              <div class="avatar-circle bg-<%= avatar_color %> avatar-with-icon">
+                <% generic_avatar_file = defined?(generic_avatar) && generic_avatar.present? ? generic_avatar : 'user-avatar.svg' %>
+                <%= image_tag generic_avatar_file, alt: title, class: 'avatar-icon' %>
+              </div>
+            <% else %>
+              <div class="avatar-circle bg-<%= avatar_color %>">
+                <%= avatar_letter %>
+              </div>
+            <% end %>
+          </div>
+          
+          <%# Contenido principal %>
+          <div class="catalog-item-content">
+            <h5 class="catalog-item-title"><%= title %></h5>
+            <% if subtitle.present? %>
+              <small class="catalog-item-subtitle"><%= subtitle %></small>
+            <% end %>
+          </div>
+          
+          <%# Acciones o contenido adicional %>
+          <% if block_given? %>
+            <div class="catalog-item-actions">
+              <%= yield %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="card shadow-sm catalog-card">
+      <div class="card-body">
+        <%# Avatar %>
+        <div class="catalog-item-avatar">
+          <% if defined?(avatar_image) && avatar_image.present? %>
+            <div class="avatar-circle bg-<%= avatar_color %>" style="background-image: url('<%= avatar_image %>'); background-size: cover; background-position: center;">
+            </div>
+          <% elsif defined?(use_generic_avatar) && use_generic_avatar %>
+            <div class="avatar-circle bg-<%= avatar_color %> avatar-with-icon">
+              <% generic_avatar_file = defined?(generic_avatar) && generic_avatar.present? ? generic_avatar : 'user-avatar.svg' %>
+              <%= image_tag generic_avatar_file, alt: title, class: 'avatar-icon' %>
+            </div>
+          <% else %>
+            <div class="avatar-circle bg-<%= avatar_color %>">
+              <%= avatar_letter %>
+            </div>
+          <% end %>
+        </div>
+        
+        <%# Contenido principal %>
+        <div class="catalog-item-content">
+          <h5 class="catalog-item-title"><%= title %></h5>
+          <% if subtitle.present? %>
+            <small class="catalog-item-subtitle"><%= subtitle %></small>
+          <% end %>
+        </div>
+        
+        <%# Acciones o contenido adicional %>
+        <% if block_given? %>
+          <div class="catalog-item-actions">
+            <%= yield %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

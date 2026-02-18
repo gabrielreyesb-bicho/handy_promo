@@ -1,0 +1,30 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Formatos de Cadena" do %>
+  <%= link_to new_format_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Formato de Cadena
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de formatos (componente reutilizable) %>
+<div class="row g-3">
+  <% if @formats.any? %>
+    <% @formats.each do |format| %>
+      <%= render 'shared/catalog_card',
+          item: format,
+          title: format.name,
+          subtitle: format.chain.name,
+          avatar_letter: format.name.first.upcase,
+          avatar_color: "primary",
+          use_generic_avatar: true,
+          generic_avatar: 'format-avatar.svg',
+          edit_path: edit_format_path(format) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-tags",
+        message: "No hay formatos de cadena registrados aún." %>
+  <% end %>
+</div>

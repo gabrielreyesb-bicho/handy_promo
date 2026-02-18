@@ -1,0 +1,28 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Unidades de Medida" do %>
+  <%= link_to new_unit_of_measure_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Unidad de Medida
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de unidades de medida (componente reutilizable) %>
+<div class="row g-3">
+  <% if @unit_of_measures.any? %>
+    <% @unit_of_measures.each do |unit_of_measure| %>
+      <%= render 'shared/catalog_card',
+          item: unit_of_measure,
+          title: unit_of_measure.name,
+          subtitle: "#{unit_of_measure.products.count} producto(s) asociado(s)",
+          avatar_letter: unit_of_measure.name.first.upcase,
+          avatar_color: "primary",
+          edit_path: edit_unit_of_measure_path(unit_of_measure) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-rulers",
+        message: "No hay unidades de medida registradas aún." %>
+  <% end %>
+</div>

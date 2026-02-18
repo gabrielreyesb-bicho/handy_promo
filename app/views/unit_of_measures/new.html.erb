@@ -1,0 +1,49 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@unit_of_measure.persisted? ? "Editar Unidad de Medida" : "Nueva Unidad de Medida") do %>
+  <button type="submit" form="unit-of-measure-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar
+  </button>
+  <%= link_to unit_of_measures_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de unidad de medida %>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= form_with model: @unit_of_measure, url: (@unit_of_measure.persisted? ? unit_of_measure_path(@unit_of_measure) : unit_of_measures_path), 
+            method: (@unit_of_measure.persisted? ? :patch : :post),
+            local: true,
+            id: "unit-of-measure-form" do |f| %>
+          
+          <% if @unit_of_measure.errors.any? %>
+            <div class="alert alert-danger">
+              <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+              <ul class="mb-0">
+                <% @unit_of_measure.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
+          <% if flash[:alert] %>
+            <div class="alert alert-danger">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+          
+          <div class="mb-3">
+            <%= f.label :name, "Nombre", class: "form-label" %>
+            <%= f.text_field :name, class: "form-control", required: true, autofocus: true, placeholder: "Ej: Pieza, Caja, Litro, Kilogramo" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

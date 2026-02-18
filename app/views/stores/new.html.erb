@@ -1,0 +1,261 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@store.persisted? ? "Editar Tienda" : "Nueva Tienda") do %>
+  <button type="submit" form="store-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar
+  </button>
+  <%= link_to stores_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de tienda %>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= form_with model: @store, url: (@store.persisted? ? store_path(@store) : stores_path), 
+            method: (@store.persisted? ? :patch : :post),
+            local: true,
+            id: "store-form" do |f| %>
+          
+          <% if @store.errors.any? %>
+            <div class="alert alert-danger">
+              <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+              <ul class="mb-0">
+                <% @store.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
+          <% if flash[:alert] %>
+            <div class="alert alert-danger">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+          
+          <div class="mb-3">
+            <%= f.label :name, "Nombre", class: "form-label" %>
+            <%= f.text_field :name, class: "form-control", required: true, autofocus: true %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :chain_id, "Cadena", class: "form-label" %>
+            <%= f.select :chain_id, 
+                options_from_collection_for_select(@chains, :id, :name, @store.chain_id),
+                { prompt: "Selecciona una cadena" },
+                { class: "form-select", required: true, id: "store_chain_id" } %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :format_id, "Formato de Cadena", class: "form-label" %>
+            <%= f.select :format_id, 
+                options_from_collection_for_select(@formats, :id, :name, @store.format_id),
+                { prompt: "Selecciona un formato de cadena" },
+                { class: "form-select", required: true, id: "store_format_id" } %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :segment_id, "Segmento", class: "form-label" %>
+            <%= f.select :segment_id, 
+                options_from_collection_for_select(@segments, :id, :name, @store.segment_id),
+                { prompt: "Selecciona un segmento" },
+                { class: "form-select", required: true } %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :address, "Dirección", class: "form-label" %>
+            <%= f.text_field :address, class: "form-control" %>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :latitude, "Latitud", class: "form-label" %>
+                <%= f.number_field :latitude, class: "form-control", step: 0.000001 %>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :longitude, "Longitud", class: "form-label" %>
+                <%= f.number_field :longitude, class: "form-control", step: 0.000001 %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :manager_name, "Nombre del Encargado", class: "form-label" %>
+                <%= f.text_field :manager_name, class: "form-control" %>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :manager_phone, "Teléfono del Encargado", class: "form-label" %>
+                <%= f.text_field :manager_phone, class: "form-control" %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :comments, "Comentarios", class: "form-label" %>
+            <%= f.text_area :comments, class: "form-control", rows: 4, placeholder: "Notas adicionales sobre la tienda..." %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :route_id, "Ruta", class: "form-label" %>
+            <%= f.select :route_id, 
+                options_for_select([["Sin ruta", ""]] + @routes.map { |r| [r.name, r.id] }, @store.route_id),
+                {},
+                { class: "form-select" } %>
+            <small class="form-text text-muted">Una tienda solo puede pertenecer a una ruta. Puedes dejar la tienda sin ruta y asignarla después desde la vista de rutas.</small>
+          </div>
+          
+          <hr class="my-4">
+          
+          <h6 class="mb-3">Programación de Visitas</h6>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :visit_day, "Día de la Semana", class: "form-label" %>
+                <%= f.select :visit_day, 
+                    options_for_select([
+                      ['Domingo', 0],
+                      ['Lunes', 1],
+                      ['Martes', 2],
+                      ['Miércoles', 3],
+                      ['Jueves', 4],
+                      ['Viernes', 5],
+                      ['Sábado', 6]
+                    ], @store.visit_day),
+                    { prompt: "Selecciona un día" },
+                    { class: "form-select" } %>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :visit_frequency, "Frecuencia de Visita", class: "form-label" %>
+                <%= f.select :visit_frequency, 
+                    options_for_select([
+                      ['Semanal', 'weekly'],
+                      ['Quincenal', 'biweekly'],
+                      ['Mensual', 'monthly']
+                    ], @store.visit_frequency),
+                    { prompt: "Selecciona una frecuencia" },
+                    { class: "form-select" } %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Función para cargar formatos
+  function loadFormats(chainId, formatSelect, selectedFormatId) {
+    if (!chainId) {
+      formatSelect.innerHTML = '<option value="">Selecciona un formato</option>';
+      formatSelect.disabled = false;
+      return;
+    }
+    
+    // Deshabilitar el select mientras carga
+    formatSelect.disabled = true;
+    formatSelect.innerHTML = '<option value="">Cargando...</option>';
+    
+    // Hacer petición AJAX para obtener los formatos
+    const url = `/chains/${chainId}/formats.json`;
+    console.log('Cargando formatos desde:', url);
+    
+    fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'same-origin',
+      method: 'GET'
+    })
+      .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          return response.text().then(text => {
+            console.error('Error response:', text);
+            throw new Error(`HTTP error! status: ${response.status}`);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Formatos recibidos:', data);
+        formatSelect.innerHTML = '<option value="">Selecciona un formato de cadena</option>';
+        if (data && Array.isArray(data) && data.length > 0) {
+          data.forEach(format => {
+            const option = document.createElement('option');
+            option.value = format.id;
+            option.textContent = format.name;
+            if (selectedFormatId && format.id == selectedFormatId) {
+              option.selected = true;
+            }
+            formatSelect.appendChild(option);
+          });
+        } else {
+          formatSelect.innerHTML = '<option value="">No hay formatos de cadena disponibles para esta cadena</option>';
+        }
+        formatSelect.disabled = false;
+      })
+      .catch(error => {
+        console.error('Error al cargar formatos de cadena:', error);
+        formatSelect.innerHTML = '<option value="">Error al cargar formatos de cadena. Ver consola para más detalles.</option>';
+        formatSelect.disabled = false;
+      });
+  }
+  
+  // Función para inicializar el selector de formatos
+  function initializeFormatSelector() {
+    const chainSelect = document.getElementById('store_chain_id');
+    const formatSelect = document.getElementById('store_format_id');
+    
+    if (chainSelect && formatSelect) {
+      console.log('Inicializando carga de formatos de cadena');
+      
+      // Remover event listeners anteriores clonando el elemento
+      const newChainSelect = chainSelect.cloneNode(true);
+      chainSelect.parentNode.replaceChild(newChainSelect, chainSelect);
+      
+      // Event listener para cambios en la selección de cadena
+      newChainSelect.addEventListener('change', function() {
+        console.log('Cadena seleccionada:', this.value);
+        if (this.value) {
+          loadFormats(this.value, formatSelect, null);
+        } else {
+          formatSelect.innerHTML = '<option value="">Selecciona un formato de cadena</option>';
+          formatSelect.disabled = false;
+        }
+      });
+    } else {
+      console.error('No se encontraron los elementos chainSelect o formatSelect');
+      if (!chainSelect) console.error('chainSelect no encontrado');
+      if (!formatSelect) console.error('formatSelect no encontrado');
+    }
+  }
+  
+  // Inicializar cuando se carga el DOM (primera carga)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeFormatSelector);
+  } else {
+    // Si el DOM ya está cargado, ejecutar inmediatamente
+    initializeFormatSelector();
+  }
+  
+  // Inicializar cuando Turbo carga una página (para navegaciones sin recarga completa)
+  document.addEventListener('turbo:load', initializeFormatSelector);
+  document.addEventListener('turbo:render', initializeFormatSelector);
+</script>

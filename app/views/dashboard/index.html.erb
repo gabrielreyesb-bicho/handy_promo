@@ -1,0 +1,196 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Dashboard" do %>
+  <small class="text-muted">
+    <i class="bi bi-calendar-day me-1"></i>
+    Datos del día: <%= Date.today.strftime("%d/%m/%Y") %>
+  </small>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de métricas %>
+<div class="row g-3 mb-4">
+  <%# Visitas Programadas %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-brand-blue);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-brand-blue); color: white;">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Visitas Programadas</h6>
+            <h3 class="mb-0" style="color: var(--color-brand-blue);"><%= @visits_scheduled %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Visitas Realizadas %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-primary-green-60);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-primary-green-60); color: white;">
+              <i class="bi bi-check-circle"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Visitas Realizadas</h6>
+            <h3 class="mb-0" style="color: var(--color-primary-green-60);"><%= @visits_completed %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Visitas Pendientes %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-secondary-yellow-60);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-secondary-yellow-60); color: white;">
+              <i class="bi bi-clock-history"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Visitas Pendientes</h6>
+            <h3 class="mb-0" style="color: var(--color-secondary-yellow-60);"><%= @visits_pending %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Tareas Completadas %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-primary-blue-50);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-primary-blue-50); color: white;">
+              <i class="bi bi-list-check"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Tareas Completadas</h6>
+            <h3 class="mb-0" style="color: var(--color-primary-blue-50);"><%= @tasks_completed_today %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Segunda fila de métricas %>
+<div class="row g-3 mb-4">
+  <%# Incidentes Reportados %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-secondary-red-60);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-secondary-red-60); color: white;">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Incidentes Reportados</h6>
+            <h3 class="mb-0" style="color: var(--color-secondary-red-60);"><%= @incidents_today %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Actualizaciones de Precios Pendientes %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-secondary-yellow-60);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-secondary-yellow-60); color: white;">
+              <i class="bi bi-currency-dollar"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Precios Pendientes</h6>
+            <h3 class="mb-0" style="color: var(--color-secondary-yellow-60);"><%= @price_updates_pending %></h3>
+            <% if @price_updates_pending > 0 %>
+              <%= link_to price_updates_path(status: 'pending'), class: "btn btn-sm mt-2", style: "border-color: var(--color-secondary-yellow-60); color: var(--color-secondary-yellow-60);" do %>
+                <i class="bi bi-arrow-right me-1"></i> Ver
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Promotores Activos %>
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm" style="border-left: 4px solid var(--color-primary-blue-50);">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="flex-shrink-0">
+            <div class="avatar-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px; background-color: var(--color-primary-blue-50); color: white;">
+              <i class="bi bi-people"></i>
+            </div>
+          </div>
+          <div class="flex-grow-1 ms-3">
+            <h6 class="text-muted mb-1" style="color: var(--color-text-secondary);">Promotores Activos</h6>
+            <h3 class="mb-0" style="color: var(--color-primary-blue-50);"><%= @promoters_active_today %></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Información adicional o acciones rápidas %>
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header" style="background-color: var(--color-bg-components);">
+        <h5 class="mb-0" style="color: var(--color-text-base);">
+          <i class="bi bi-lightning-charge me-2" style="color: var(--color-brand-blue);"></i>
+          Acciones Rápidas
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <%= link_to visits_path, class: "btn w-100", style: "border-color: var(--color-brand-blue); color: var(--color-brand-blue);" do %>
+              <i class="bi bi-calendar-check me-2"></i>
+              Ver Todas las Visitas
+            <% end %>
+          </div>
+          <div class="col-md-3">
+            <%= link_to work_plan_executions_path, class: "btn w-100", style: "border-color: var(--color-primary-green-60); color: var(--color-primary-green-60);" do %>
+              <i class="bi bi-clipboard-check me-2"></i>
+              Seguimiento de Planes
+            <% end %>
+          </div>
+          <div class="col-md-3">
+            <%= link_to price_updates_path, class: "btn w-100", style: "border-color: var(--color-secondary-yellow-60); color: var(--color-secondary-yellow-60);" do %>
+              <i class="bi bi-currency-dollar me-2"></i>
+              Actualizaciones de Precios
+            <% end %>
+          </div>
+          <div class="col-md-3">
+            <%= link_to new_visit_path, class: "btn w-100", style: "background-color: var(--color-brand-blue); color: white; border: none;" do %>
+              <i class="bi bi-plus-circle me-2"></i>
+              Programar Visita
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

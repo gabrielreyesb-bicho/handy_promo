@@ -1,0 +1,60 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Configuración Planes" do %>
+  <%= link_to new_work_plan_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Plan de Trabajo
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de planes de trabajo (componente reutilizable) %>
+<div class="row g-3">
+  <% if @work_plans.any? %>
+    <% @work_plans.each do |work_plan| %>
+      <div class="col-md-6">
+        <div class="card shadow-sm catalog-card catalog-card-clickable" onclick="window.location='<%= edit_work_plan_path(work_plan) %>'">
+          <div class="card-body">
+            <%# Avatar %>
+            <div class="catalog-item-avatar">
+              <div class="avatar-circle bg-primary avatar-with-icon">
+                <%= image_tag 'work-plan-avatar.svg', alt: 'Plan de Trabajo', class: 'avatar-icon' %>
+              </div>
+            </div>
+            
+            <%# Contenido principal %>
+            <div class="catalog-item-content">
+              <h5 class="catalog-item-title"><%= work_plan.name %></h5>
+              <small class="catalog-item-subtitle">
+                <strong>Código:</strong> <%= work_plan.code %> | 
+                <strong>Tareas:</strong> <%= work_plan.tasks.count %>
+                <% if work_plan.format.present? %>
+                  | <strong>Formato:</strong> <%= work_plan.format.name %> (<%= work_plan.format.chain.name %>)
+                <% else %>
+                  | <span class="text-muted">Plan genérico</span>
+                <% end %>
+                <% if work_plan.description.present? %>
+                  <br><%= truncate(work_plan.description, length: 100) %>
+                <% end %>
+              </small>
+            </div>
+            
+            <%# Acciones %>
+            <div class="catalog-item-actions">
+              <%= link_to work_plan_path(work_plan), class: "btn btn-sm btn-outline-info me-2" do %>
+                <i class="bi bi-eye me-1"></i> Ver
+              <% end %>
+              <%= link_to edit_work_plan_path(work_plan), class: "btn btn-sm btn-outline-primary" do %>
+                <i class="bi bi-pencil me-1"></i> Editar
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-clipboard-check",
+        message: "No hay planes de trabajo registrados aún." %>
+  <% end %>
+</div>

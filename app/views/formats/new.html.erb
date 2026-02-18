@@ -1,0 +1,62 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@format.persisted? ? "Editar Formato de Cadena" : "Nuevo Formato de Cadena") do %>
+  <button type="submit" form="format-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar
+  </button>
+  <%= link_to formats_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de formato %>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= form_with model: @format, url: (@format.persisted? ? format_path(@format) : formats_path), 
+            method: (@format.persisted? ? :patch : :post),
+            local: true,
+            id: "format-form" do |f| %>
+          
+          <% if @format.errors.any? %>
+            <div class="alert alert-danger">
+              <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+              <ul class="mb-0">
+                <% @format.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
+          <% if flash[:alert] %>
+            <div class="alert alert-danger">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+          
+          <div class="mb-3">
+            <%= f.label :chain_id, "Cadena", class: "form-label" %>
+            <%= f.select :chain_id, 
+                options_from_collection_for_select(@chains, :id, :name, @format.chain_id),
+                { prompt: "Selecciona una cadena" },
+                { class: "form-select", required: true } %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :name, "Nombre", class: "form-label" %>
+            <%= f.text_field :name, class: "form-control", required: true, autofocus: true %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :comments, "Comentarios", class: "form-label" %>
+            <%= f.text_area :comments, class: "form-control", rows: 4, placeholder: "Notas adicionales sobre el formato de cadena..." %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

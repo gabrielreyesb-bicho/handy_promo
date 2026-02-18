@@ -1,0 +1,73 @@
+<%= form_with model: @visit, local: true do |f| %>
+  <% if @visit.errors.any? %>
+    <div class="alert alert-danger">
+      <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+      <ul class="mb-0">
+        <% @visit.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <% if flash[:alert] %>
+    <div class="alert alert-danger">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :user_id, "Promotor", class: "form-label fw-bold" %>
+        <%= f.collection_select :user_id, @promoters, :id, :name,
+            { prompt: "Selecciona un promotor" },
+            { class: "form-select", required: true } %>
+        <small class="form-text text-muted">Selecciona el promotor que realizará la visita</small>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :store_id, "Tienda", class: "form-label fw-bold" %>
+        <%= f.collection_select :store_id, @stores, :id, :name,
+            { prompt: "Selecciona una tienda" },
+            { class: "form-select", required: true } %>
+        <small class="form-text text-muted">Selecciona la tienda a visitar</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :scheduled_date, "Fecha Programada", class: "form-label fw-bold" %>
+        <%= f.date_field :scheduled_date, class: "form-control", required: true %>
+        <small class="form-text text-muted">Fecha en que se realizará la visita</small>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= f.label :status, "Estado", class: "form-label fw-bold" %>
+        <%= f.select :status, 
+            options_for_select([
+              ['Programada', 'scheduled'],
+              ['En Curso', 'in_progress'],
+              ['Completada', 'completed'],
+              ['Cancelada', 'cancelled']
+            ], @visit.status),
+            {},
+            { class: "form-select" } %>
+        <small class="form-text text-muted">Estado actual de la visita</small>
+      </div>
+    </div>
+  </div>
+  
+  <div class="d-flex justify-content-end gap-2">
+    <%= link_to visits_path, class: "btn btn-secondary" do %>
+      <i class="bi bi-x-circle me-2"></i> Cancelar
+    <% end %>
+    <%= f.submit "Guardar Visita", class: "btn btn-primary" %>
+  </div>
+<% end %>

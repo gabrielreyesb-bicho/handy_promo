@@ -1,0 +1,10 @@
+<%# Partial reutilizable para estado vacío (sin elementos) %>
+<%# Uso: render 'shared/empty_state', icon: "bi-people", message: "Mensaje" %>
+<div class="col-12">
+  <div class="card shadow-sm">
+    <div class="card-body catalog-empty-state">
+      <i class="bi <%= icon %> empty-state-icon"></i>
+      <p class="empty-state-message"><%= message %></p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Seguimiento Planes" do %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de planes ejecutados (componente reutilizable) %>
+<div class="row g-3">
+  <% if @executions.any? %>
+    <% @executions.each do |visit| %>
+      <%# Obtener el plan de trabajo de la primera respuesta %>
+      <% first_response = visit.visit_task_responses.first %>
+      <% work_plan = first_response&.work_plan_task&.work_plan %>
+      <% next unless work_plan %>
+      
+      <div class="col-md-6">
+        <div class="card shadow-sm catalog-card">
+          <div class="card-body">
+            <%# Avatar %>
+            <div class="catalog-item-avatar">
+              <div class="avatar-circle bg-success avatar-with-icon">
+                <%= image_tag 'work-plan-avatar.svg', alt: 'Plan Ejecutado', class: 'avatar-icon' %>
+              </div>
+            </div>
+            
+            <%# Contenido principal %>
+            <div class="catalog-item-content">
+              <h5 class="catalog-item-title"><%= visit.store.name %></h5>
+              <small class="catalog-item-subtitle">
+                <strong>Cadena:</strong> <%= visit.store.chain.name %> | 
+                <strong>Formato:</strong> <%= visit.store.format.name %>
+                <br>
+                <strong>Plan de Trabajo:</strong> <%= work_plan.name %>
+                <br>
+                <strong>Tareas Ejecutadas:</strong>
+                <ul class="mb-0 mt-1" style="padding-left: 20px;">
+                  <% visit.visit_task_responses
+                      .includes(work_plan_task: :task)
+                      .joins(work_plan_task: :task)
+                      .order('work_plan_tasks.position')
+                      .each do |response| %>
+                    <li><%= response.work_plan_task.task.name %></li>
+                  <% end %>
+                </ul>
+                <br>
+                <strong>Fecha y Hora de Terminación:</strong> 
+                <%= visit.updated_at.strftime("%d/%m/%Y a las %H:%M") %>
+              </small>
+            </div>
+            
+            <%# Acciones %>
+            <div class="catalog-item-actions">
+              <%= link_to work_plan_execution_path(visit), class: "btn btn-sm btn-outline-info" do %>
+                <i class="bi bi-eye me-1"></i> Ver Detalles
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-clipboard-check",
+        message: "No hay planes de trabajo ejecutados aún." %>
+  <% end %>
+</div>

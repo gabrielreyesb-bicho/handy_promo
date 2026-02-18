@@ -1,0 +1,28 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Familias de Productos" do %>
+  <%= link_to new_product_family_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Familia de Productos
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de familias de productos (componente reutilizable) %>
+<div class="row g-3">
+  <% if @product_families.any? %>
+    <% @product_families.each do |product_family| %>
+      <%= render 'shared/catalog_card',
+          item: product_family,
+          title: product_family.name,
+          subtitle: "#{product_family.products.count} producto(s) asociado(s)",
+          avatar_letter: product_family.name.first.upcase,
+          avatar_color: "primary",
+          edit_path: edit_product_family_path(product_family) %>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-folder",
+        message: "No hay familias de productos registradas aún." %>
+  <% end %>
+</div>

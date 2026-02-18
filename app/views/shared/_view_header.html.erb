@@ -1,0 +1,10 @@
+<%# Partial reutilizable para la barra de información/navegación de vistas %>
+<%# Uso: render 'shared/view_header', title: "Título" do ... end %>
+<div class="view-header">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4><%= title %></h4>
+    <div class="view-actions">
+      <%= yield if block_given? %>
+    </div>
+  </div>
+</div>

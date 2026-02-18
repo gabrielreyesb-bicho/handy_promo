@@ -1,0 +1,86 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@user.persisted? ? "Editar Usuario" : "Nuevo Usuario") do %>
+  <button type="submit" form="user-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar
+  </button>
+  <%= link_to users_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de usuario %>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <%= form_with model: @user, url: (@user.persisted? ? user_path(@user) : users_path), 
+            method: (@user.persisted? ? :patch : :post),
+            local: true,
+            id: "user-form" do |f| %>
+          
+          <% if @user.errors.any? %>
+            <div class="alert alert-danger">
+              <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+              <ul class="mb-0">
+                <% @user.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+          
+          <% if flash[:alert] %>
+            <div class="alert alert-danger">
+              <%= flash[:alert] %>
+            </div>
+          <% end %>
+          
+          <div class="mb-3">
+            <%= f.label :name, "Nombre", class: "form-label" %>
+            <%= f.text_field :name, class: "form-control", required: true, autofocus: true %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :email, "Correo Electrónico", class: "form-label" %>
+            <%= f.email_field :email, class: "form-control", required: true %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :role, "Rol", class: "form-label" %>
+            <%= f.select :role, 
+                options_for_select([
+                  ['Administrador', 'admin'],
+                  ['Supervisor', 'supervisor'],
+                  ['Promotor', 'promoter'],
+                  ['Otro', 'other']
+                ], @user.role),
+                {},
+                { class: "form-select" } %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :password, "Contraseña", class: "form-label" %>
+            <% if @user.persisted? %>
+              <small class="text-muted">(Dejar en blanco si no deseas cambiarla)</small>
+            <% else %>
+              <small class="text-muted">(Mínimo 6 caracteres)</small>
+            <% end %>
+            <%= f.password_field :password, class: "form-control", 
+                required: !@user.persisted?,
+                autocomplete: "new-password" %>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :password_confirmation, "Confirmar Contraseña", class: "form-label" %>
+            <%= f.password_field :password_confirmation, class: "form-control",
+                required: !@user.persisted?,
+                autocomplete: "new-password" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

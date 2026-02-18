@@ -1,0 +1,56 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Productos" do %>
+  <%= link_to new_product_path, class: "btn btn-primary" do %>
+    <i class="bi bi-plus-circle me-2"></i> Crear Producto
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de productos (componente reutilizable) %>
+<div class="row g-3">
+  <% if @products.any? %>
+    <% @products.each do |product| %>
+      <div class="col-md-6">
+        <div class="card shadow-sm catalog-card catalog-card-clickable" onclick="window.location='<%= edit_product_path(product) %>'">
+          <div class="card-body">
+            <%# Avatar %>
+            <div class="catalog-item-avatar">
+              <div class="avatar-circle bg-primary">
+                <%= (product.name.presence || 'P').first.upcase %>
+              </div>
+            </div>
+            
+            <%# Contenido principal %>
+            <div class="catalog-item-content">
+              <h5 class="catalog-item-title"><%= product.name.presence || 'Producto sin nombre' %></h5>
+              <small class="catalog-item-subtitle">
+                <strong>Código:</strong> <%= product.code.presence || '-' %> | 
+                <strong>Familia:</strong> <%= product.product_family.name %>
+                <br>
+                <strong>Presentaciones:</strong> 
+                <% if product.product_presentations.any? %>
+                  <%= product.product_presentations.active.map { |p| p.full_name }.join(', ') %>
+                <% else %>
+                  <span class="text-muted">Sin presentaciones</span>
+                <% end %>
+              </small>
+            </div>
+            
+            <%# Acciones %>
+            <div class="catalog-item-actions">
+              <%= link_to edit_product_path(product), class: "btn btn-sm btn-outline-primary" do %>
+                <i class="bi bi-pencil me-1"></i> Editar
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-box",
+        message: "No hay productos registrados aún." %>
+  <% end %>
+</div>

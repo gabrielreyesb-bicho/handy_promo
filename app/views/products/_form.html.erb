@@ -1,0 +1,479 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: (@product.persisted? ? "Editar Producto" : "Nuevo Producto") do %>
+  <button type="submit" form="product-form" class="btn btn-primary">
+    <i class="bi bi-check-circle me-2"></i> Guardar Producto
+  </button>
+  <%= link_to products_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-x-circle me-2"></i> Cancelar
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Formulario de producto con presentaciones %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-10">
+    <%= form_with model: @product, url: (@product.persisted? ? product_path(@product) : products_path), 
+        method: (@product.persisted? ? :patch : :post),
+        local: true,
+        id: "product-form" do |f| %>
+      
+      <% if @product.errors.any? %>
+        <div class="alert alert-danger">
+          <h6 class="alert-heading">Por favor corrige los siguientes errores:</h6>
+          <ul class="mb-0">
+            <% @product.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <% if flash[:alert] %>
+        <div class="alert alert-danger">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+      
+      <%# Información del Producto %>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-box me-2"></i>Información del Producto</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :code, "Código del Producto", class: "form-label fw-bold" %>
+                <%= f.text_field :code, class: "form-control", required: true, autofocus: true, placeholder: "Ej: BICHO" %>
+                <small class="form-text text-muted">Código único del producto</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :name, "Nombre del Producto", class: "form-label fw-bold" %>
+                <%= f.text_field :name, class: "form-control", required: true, placeholder: "Ej: Bicho Cola" %>
+                <small class="form-text text-muted">Nombre del producto</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <%= f.label :product_family_id, "Familia de Productos", class: "form-label" %>
+                <%= f.select :product_family_id, 
+                    options_from_collection_for_select(@product_families, :id, :name, @product.product_family_id),
+                    { prompt: "Selecciona una familia de productos" },
+                    { class: "form-select", required: true } %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <%= f.label :comments, "Comentarios", class: "form-label" %>
+            <%= f.text_area :comments, class: "form-control", rows: 3, placeholder: "Notas adicionales sobre el producto..." %>
+          </div>
+        </div>
+      </div>
+      
+      <%# Presentaciones %>
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Presentaciones</h5>
+        </div>
+        <div class="card-body p-4">
+          <%# Tabla de presentaciones agregadas %>
+          <div class="mb-4">
+            <h6 class="mb-3"><i class="bi bi-list-check me-2"></i>Presentaciones Agregadas (<span id="presentation-count">0</span>)</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered" id="presentations-table">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 5%">#</th>
+                    <th style="width: 25%">Código</th>
+                    <th style="width: 15%">Tamaño</th>
+                    <th style="width: 15%">Unidad</th>
+                    <th style="width: 25%">Código de Barras</th>
+                    <th style="width: 15%">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="presentations-table-body">
+                  <%# Se llena dinámicamente con JavaScript %>
+                  <% if @product.persisted? && @product.product_presentations.any? %>
+                    <% @product.product_presentations.each_with_index do |presentation, index| %>
+                      <tr data-presentation-id="<%= presentation.id %>">
+                        <td><%= index + 1 %></td>
+                        <td><%= presentation.code %></td>
+                        <td><%= presentation.size %></td>
+                        <td><%= presentation.unit_of_measure.name %></td>
+                        <td><%= presentation.barcode.presence || '-' %></td>
+                        <td>
+                          <button type="button" class="btn btn-sm btn-outline-danger remove-presentation-row" data-presentation-id="<%= presentation.id %>">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <%# Formulario para agregar nueva presentación %>
+          <div class="card border-primary">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva Presentación</h6>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="mb-3">
+                    <label for="new-presentation-code" class="form-label">Código <span class="text-danger">*</span></label>
+                    <input type="text" id="new-presentation-code" class="form-control" placeholder="Ej: BICHO-350">
+                    <small class="form-text text-muted">Código único de la presentación</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-2">
+                  <div class="mb-3">
+                    <label for="new-presentation-size" class="form-label">Tamaño</label>
+                    <input type="number" id="new-presentation-size" class="form-control" step="0.01" min="0" placeholder="350">
+                    <small class="form-text text-muted">Número</small>
+                  </div>
+                </div>
+                
+                <div class="col-md-2">
+                  <div class="mb-3">
+                    <label for="new-presentation-unit" class="form-label">Unidad <span class="text-danger">*</span></label>
+                    <select id="new-presentation-unit" class="form-select">
+                      <option value="">Selecciona...</option>
+                      <% @unit_of_measures.each do |uom| %>
+                        <option value="<%= uom.id %>"><%= uom.name %></option>
+                      <% end %>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="col-md-3">
+                  <div class="mb-3">
+                    <label for="new-presentation-barcode" class="form-label">Código de Barras</label>
+                    <input type="text" id="new-presentation-barcode" class="form-control" placeholder="Opcional">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-flex justify-content-end">
+                <button type="button" id="add-presentation-btn" class="btn btn-primary">
+                  <i class="bi bi-plus-circle me-2"></i> Agregar
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Nota:</strong> El producto debe tener al menos una presentación. Cada presentación debe tener un código único.
+          </div>
+        </div>
+      </div>
+      
+      <%# Hidden fields container para nested attributes - se llena dinámicamente con JavaScript %>
+      <div id="presentations-hidden-fields" style="display: none;">
+        <%# Se llenan dinámicamente con JavaScript antes de enviar el formulario %>
+      </div>
+      
+    <% end %>
+  </div>
+</div>
+
+<%# JavaScript para manejar presentaciones dinámicamente %>
+<script>
+  (function() {
+    'use strict';
+    
+    // Datos de presentaciones en memoria
+    let presentations = [];
+    let presentationIndex = 0;
+    
+    // Referencias a elementos del DOM
+    const tableBody = document.getElementById('presentations-table-body');
+    const countSpan = document.getElementById('presentation-count');
+    const addBtn = document.getElementById('add-presentation-btn');
+    const hiddenFieldsContainer = document.getElementById('presentations-hidden-fields');
+    const productForm = document.getElementById('product-form');
+    
+    // Campos del formulario de nueva presentación
+    const codeInput = document.getElementById('new-presentation-code');
+    const sizeInput = document.getElementById('new-presentation-size');
+    const unitSelect = document.getElementById('new-presentation-unit');
+    const barcodeInput = document.getElementById('new-presentation-barcode');
+    
+    // Cargar presentaciones existentes si estamos editando
+    <% if @product.persisted? && @product.product_presentations.any? %>
+      <% @product.product_presentations.each do |presentation| %>
+        presentations.push({
+          id: <%= presentation.id %>,
+          code: '<%= j(presentation.code) %>',
+          size: '<%= presentation.size %>',
+          unit_of_measure_id: <%= presentation.unit_of_measure_id %>,
+          unit_name: '<%= j(presentation.unit_of_measure.name) %>',
+          barcode: '<%= j(presentation.barcode || '') %>',
+          is_existing: true
+        });
+      <% end %>
+      presentationIndex = presentations.length;
+    <% end %>
+    
+    // Función para actualizar el contador
+    function updateCount() {
+      if (countSpan) {
+        const visibleCount = presentations.filter(p => !p._destroy).length;
+        countSpan.textContent = visibleCount;
+      }
+    }
+    
+    // Función para limpiar el formulario de nueva presentación
+    function clearPresentationForm() {
+      codeInput.value = '';
+      sizeInput.value = '';
+      unitSelect.value = '';
+      barcodeInput.value = '';
+      codeInput.focus();
+    }
+    
+    // Función para agregar presentación a la tabla
+    function addPresentationToTable(presentation) {
+      const row = document.createElement('tr');
+      row.setAttribute('data-presentation-index', presentation.index);
+      if (presentation.id) {
+        row.setAttribute('data-presentation-id', presentation.id);
+      }
+      
+      const rowNumber = presentations.length;
+      
+      row.innerHTML = `
+        <td>${rowNumber}</td>
+        <td>${presentation.code || '-'}</td>
+        <td>${presentation.size || '-'}</td>
+        <td>${presentation.unit_name || '-'}</td>
+        <td>${presentation.barcode || '-'}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-outline-danger remove-presentation-row" data-index="${presentation.index}">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      `;
+      
+      tableBody.appendChild(row);
+      
+      // Agregar event listener al botón de eliminar
+      const removeBtn = row.querySelector('.remove-presentation-row');
+      removeBtn.addEventListener('click', function() {
+        removePresentation(presentation.index);
+      });
+      
+      updateCount();
+    }
+    
+    // Función para remover presentación
+    function removePresentation(index) {
+      const presentationIndex = presentations.findIndex(p => p.index === index);
+      if (presentationIndex !== -1) {
+        const presentation = presentations[presentationIndex];
+        if (presentation && presentation.is_existing) {
+          // Si es una presentación existente, marcarla para destrucción pero mantenerla
+          presentation._destroy = true;
+        } else {
+          // Si es nueva, eliminarla completamente
+          presentations.splice(presentationIndex, 1);
+        }
+      }
+      renderTable();
+    }
+    
+    // Función para renderizar toda la tabla
+    function renderTable() {
+      tableBody.innerHTML = '';
+      // Filtrar solo las presentaciones que no están marcadas para destrucción
+      const visiblePresentations = presentations.filter(p => !p._destroy);
+      visiblePresentations.forEach((presentation, idx) => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-presentation-index', presentation.index);
+        if (presentation.id) {
+          row.setAttribute('data-presentation-id', presentation.id);
+        }
+        
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${presentation.code || '-'}</td>
+          <td>${presentation.size || '-'}</td>
+          <td>${presentation.unit_name || '-'}</td>
+          <td>${presentation.barcode || '-'}</td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-presentation-row" data-index="${presentation.index}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+        
+        // Agregar event listener al botón de eliminar
+        const removeBtn = row.querySelector('.remove-presentation-row');
+        removeBtn.addEventListener('click', function() {
+          removePresentation(presentation.index);
+        });
+      });
+      
+      updateCount();
+    }
+    
+    // Función para obtener el nombre de la unidad de medida
+    function getUnitName(unitId) {
+      const option = unitSelect.querySelector(`option[value="${unitId}"]`);
+      return option ? option.textContent : '';
+    }
+    
+    // Event listener para el botón Agregar
+    if (addBtn) {
+      addBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Validar campos requeridos
+        if (!codeInput.value.trim()) {
+          alert('El código de la presentación es requerido');
+          codeInput.focus();
+          return;
+        }
+        
+        if (!unitSelect.value) {
+          alert('La unidad de medida es requerida');
+          unitSelect.focus();
+          return;
+        }
+        
+        // Verificar que el código no esté duplicado
+        const codeExists = presentations.some(p => p.code.toLowerCase() === codeInput.value.trim().toLowerCase());
+        if (codeExists) {
+          alert('Ya existe una presentación con este código');
+          codeInput.focus();
+          return;
+        }
+        
+        // Crear objeto de presentación
+        const presentation = {
+          index: presentationIndex++,
+          code: codeInput.value.trim(),
+          size: sizeInput.value.trim(),
+          unit_of_measure_id: parseInt(unitSelect.value),
+          unit_name: getUnitName(unitSelect.value),
+          barcode: barcodeInput.value.trim(),
+          is_existing: false
+        };
+        
+        // Agregar a la lista
+        presentations.push(presentation);
+        
+        // Agregar a la tabla
+        addPresentationToTable(presentation);
+        
+        // Limpiar formulario
+        clearPresentationForm();
+      });
+    }
+    
+    // Función para generar hidden fields antes de enviar el formulario
+    function generateHiddenFields() {
+      hiddenFieldsContainer.innerHTML = '';
+      
+      let attrIndex = 0;
+      presentations.forEach((presentation) => {
+        // Si está marcada para destrucción, solo incluir id y _destroy
+        if (presentation._destroy && presentation.id) {
+          const prefix = `product[product_presentations_attributes][${attrIndex}]`;
+          
+          const idField = document.createElement('input');
+          idField.type = 'hidden';
+          idField.name = `${prefix}[id]`;
+          idField.value = presentation.id;
+          hiddenFieldsContainer.appendChild(idField);
+          
+          const destroyField = document.createElement('input');
+          destroyField.type = 'hidden';
+          destroyField.name = `${prefix}[_destroy]`;
+          destroyField.value = '1';
+          hiddenFieldsContainer.appendChild(destroyField);
+          
+          attrIndex++;
+          return;
+        }
+        
+        // Si no está marcada para destrucción, incluir todos los campos
+        const prefix = `product[product_presentations_attributes][${attrIndex}]`;
+        
+        // Si es una presentación existente, incluir el ID
+        if (presentation.id) {
+          const idField = document.createElement('input');
+          idField.type = 'hidden';
+          idField.name = `${prefix}[id]`;
+          idField.value = presentation.id;
+          hiddenFieldsContainer.appendChild(idField);
+        }
+        
+        // Campos de la presentación
+        const fields = {
+          code: presentation.code,
+          size: presentation.size,
+          unit_of_measure_id: presentation.unit_of_measure_id,
+          barcode: presentation.barcode,
+          active: 'true'
+        };
+        
+        Object.keys(fields).forEach(key => {
+          if (fields[key] !== undefined && fields[key] !== null && fields[key] !== '') {
+            const field = document.createElement('input');
+            field.type = 'hidden';
+            field.name = `${prefix}[${key}]`;
+            field.value = fields[key];
+            hiddenFieldsContainer.appendChild(field);
+          }
+        });
+        
+        attrIndex++;
+      });
+    }
+    
+    // Event listener para el envío del formulario
+    if (productForm) {
+      productForm.addEventListener('submit', function(e) {
+        // Validar que haya al menos una presentación
+        if (presentations.length === 0) {
+          e.preventDefault();
+          alert('Debes agregar al menos una presentación al producto');
+          return false;
+        }
+        
+        // Generar hidden fields antes de enviar
+        generateHiddenFields();
+      });
+    }
+    
+    // Renderizar tabla inicial si hay presentaciones existentes
+    if (presentations.length > 0) {
+      renderTable();
+    }
+    
+    // Permitir agregar con Enter en el campo de código
+    if (codeInput) {
+      codeInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addBtn.click();
+        }
+      });
+    }
+  })();
+</script>

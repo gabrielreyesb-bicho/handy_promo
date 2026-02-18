@@ -1,0 +1,68 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: @task.name do %>
+  <%= link_to tasks_path, class: "btn btn-secondary" do %>
+    <i class="bi bi-arrow-left me-2"></i> Volver a Tareas
+  <% end %>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Detalles de la tarea %>
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información de la Tarea</h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Código:</strong><br>
+            <code class="text-primary"><%= @task.code %></code>
+          </div>
+          <div class="col-md-6">
+            <strong>Tipo:</strong><br>
+            <span class="badge bg-secondary"><%= @task.task_type.humanize %></span>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <strong>Nombre:</strong><br>
+          <h5 class="mt-2"><%= @task.name %></h5>
+        </div>
+        
+        <% if @task.description.present? %>
+          <div class="mb-3">
+            <strong>Descripción:</strong><br>
+            <p class="mt-2"><%= @task.description %></p>
+          </div>
+        <% end %>
+        
+        <% if @task.instructions_template.present? %>
+          <div class="mb-3">
+            <strong>Plantilla de Instrucciones:</strong><br>
+            <div class="alert alert-light mt-2">
+              <i class="bi bi-quote me-2"></i>
+              <%= @task.instructions_template %>
+            </div>
+          </div>
+        <% end %>
+        
+        <% if @task.config.present? && @task.config.any? %>
+          <div class="mb-3">
+            <strong>Configuración:</strong><br>
+            <pre class="bg-light p-3 rounded mt-2"><code><%= JSON.pretty_generate(@task.config) %></code></pre>
+          </div>
+        <% end %>
+        
+        <div class="mt-4 pt-3 border-top">
+          <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Esta tarea es predefinida y no puede ser modificada. Se utiliza como plantilla al crear planes de trabajo.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

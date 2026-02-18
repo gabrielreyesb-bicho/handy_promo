@@ -1,0 +1,52 @@
+<%# Barra de información / navegación (componente reutilizable) %>
+<%= render 'shared/view_header', title: "Tareas Predefinidas" do %>
+  <small class="text-muted">
+    <i class="bi bi-info-circle me-1"></i>Las tareas son predefinidas y no pueden ser modificadas
+  </small>
+<% end %>
+
+<%# Espacio vacío (componente reutilizable) %>
+<div class="view-spacing"></div>
+
+<%# Tarjetas de tareas (componente reutilizable) %>
+<div class="row g-3">
+  <% if @tasks.any? %>
+    <% @tasks.each do |task| %>
+      <div class="col-md-6">
+        <div class="card shadow-sm catalog-card catalog-card-clickable" onclick="window.location='<%= task_path(task) %>'">
+          <div class="card-body">
+            <%# Avatar %>
+            <div class="catalog-item-avatar">
+              <div class="avatar-circle bg-info">
+                <%= task.name.first.upcase %>
+              </div>
+            </div>
+            
+            <%# Contenido principal %>
+            <div class="catalog-item-content">
+              <h5 class="catalog-item-title"><%= task.name %></h5>
+              <small class="catalog-item-subtitle">
+                <strong>Código:</strong> <%= task.code %><br>
+                <strong>Tipo:</strong> <%= task.task_type.humanize %><br>
+                <% if task.description.present? %>
+                  <%= truncate(task.description, length: 80) %>
+                <% end %>
+              </small>
+            </div>
+            
+            <%# Acciones %>
+            <div class="catalog-item-actions">
+              <%= link_to task_path(task), class: "btn btn-sm btn-outline-primary" do %>
+                <i class="bi bi-eye me-1"></i> Ver Detalles
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <%= render 'shared/empty_state',
+        icon: "bi-list-task",
+        message: "No hay tareas predefinidas disponibles." %>
+  <% end %>
+</div>
