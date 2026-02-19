@@ -116,6 +116,7 @@ class DashboardController < ApplicationController
   # Método helper para calcular ingresos de un rango de fechas
   # Usa la misma lógica en calculate_monthly_summary y calculate_income_vs_expenses
   # EXCLUYE pagos de tarjeta de crédito que no son ingresos reales
+  # Devuelve un hash con :amount y :count para garantizar consistencia
   def calculate_income_for_period(month_start, month_end)
     month_transactions = Transaction.where(user: current_user, date: month_start..month_end)
     debit_cards = Card.where(user: current_user, card_type: 'debito').pluck(:id)
@@ -143,13 +144,14 @@ class DashboardController < ApplicationController
       *payment_patterns
     )
     income_from_debit = abonos_debito.sum(:amount) || 0
+    count_from_debit = abonos_debito.count
     
-    Rails.logger.info "🔍 [INCOME DEBUG] Abonos en débito (sin pagos tarjeta): #{abonos_debito.count}, Suma: #{income_from_debit}"
+    Rails.logger.info "🔍 [INCOME DEBUG] Abonos en débito (sin pagos tarjeta): #{count_from_debit}, Suma: #{income_from_debit}"
     
     # Abonos que son claramente ingresos aunque estén en tarjetas de crédito
     # (esto corrige errores de clasificación del parser)
     # EXCLUIR pagos de tarjeta de crédito
-    income_from_misclassified = month_transactions.abonos
+    abonos_credito_ingresos = month_transactions.abonos
                                                   .where.not(card_id: debit_cards)
                                                   .where("UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ?",
                                                          "%DEPOSITO DE TERCERO%", "%SPEI RECIBIDO%", "%PAGO DE NOMINA%", "%TRANSFERENCIA RECIBIDA%", "%ABONO A TU CUENTA%")
@@ -157,13 +159,15 @@ class DashboardController < ApplicationController
                                                     payment_patterns.map { |pattern| "UPPER(description) LIKE ?" }.join(" OR "),
                                                     *payment_patterns
                                                   )
-                                                  .sum(:amount) || 0
+    income_from_misclassified = abonos_credito_ingresos.sum(:amount) || 0
+    count_from_misclassified = abonos_credito_ingresos.count
     
-    Rails.logger.info "🔍 [INCOME DEBUG] Ingresos mal clasificados (sin pagos tarjeta): #{income_from_misclassified}"
-    total = income_from_debit + income_from_misclassified
-    Rails.logger.info "🔍 [INCOME DEBUG] Total ingresos (sin pagos tarjeta): #{total}"
+    Rails.logger.info "🔍 [INCOME DEBUG] Ingresos mal clasificados (sin pagos tarjeta): #{count_from_misclassified}, Suma: #{income_from_misclassified}"
+    total_amount = income_from_debit + income_from_misclassified
+    total_count = count_from_debit + count_from_misclassified
+    Rails.logger.info "🔍 [INCOME DEBUG] Total ingresos (sin pagos tarjeta): #{total_count} transacciones, $#{total_amount}"
     
-    total
+    { amount: total_amount, count: total_count }
   end
 
   def calculate_monthly_summary
@@ -179,8 +183,10 @@ class DashboardController < ApplicationController
     
     # Ingresos (abonos) - Usar la lógica correcta que excluye pagos de tarjeta
     # Solo contar abonos en tarjetas de débito o ingresos reales mal clasificados
-    @month_income = calculate_income_for_period(month_start, month_end)
-    Rails.logger.info "🔍 [DASHBOARD DEBUG] Ingresos calculados (con filtros): #{@month_income}"
+    income_data = calculate_income_for_period(month_start, month_end)
+    @month_income = income_data[:amount]
+    @income_count = income_data[:count]
+    Rails.logger.info "🔍 [DASHBOARD DEBUG] Ingresos calculados (con filtros): #{@income_count} transacciones, $#{@month_income}"
     
     # Egresos (cargos) - ALINEAR CON VISTA DE TRANSACCIONES: 
     # Cargos clasificados sin transferencias + cargos sin clasificar
@@ -234,34 +240,8 @@ class DashboardController < ApplicationController
       @expenses_count = month_transactions.cargos.count
     end
     
-    # Para ingresos: usar la misma lógica que el cálculo de @month_income (excluir pagos de tarjeta)
-    debit_cards = Card.where(user: current_user, card_type: 'debito').pluck(:id)
-    payment_patterns = [
-      "%PAGO TARJETA%",
-      "%PAGO TDC%",
-      "%BMOVIL.PAGO%",
-      "%PAGO TARJETA DE CREDITO%",
-      "%PAGO TARJETA DE CRÉDITO%",
-      "%PAGO TARJETA DE CREDITO/%",
-      "%PAGO TARJETA DE CRÉDITO/%"
-    ]
-    
-    abonos_debito = month_transactions.abonos.where(card_id: debit_cards)
-    abonos_debito = abonos_debito.where.not(
-      payment_patterns.map { |pattern| "UPPER(description) LIKE ?" }.join(" OR "),
-      *payment_patterns
-    )
-    
-    abonos_credito_ingresos = month_transactions.abonos
-                                                .where.not(card_id: debit_cards)
-                                                .where("UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ? OR UPPER(description) LIKE ?",
-                                                       "%DEPOSITO DE TERCERO%", "%SPEI RECIBIDO%", "%PAGO DE NOMINA%", "%TRANSFERENCIA RECIBIDA%", "%ABONO A TU CUENTA%")
-                                                .where.not(
-                                                  payment_patterns.map { |pattern| "UPPER(description) LIKE ?" }.join(" OR "),
-                                                  *payment_patterns
-                                                )
-    
-    @income_count = abonos_debito.count + abonos_credito_ingresos.count
+    # Para ingresos: el conteo ya se calculó junto con el monto en calculate_income_for_period
+    # para garantizar que ambos usen exactamente la misma lógica
     
     # Comparación con mes anterior
     prev_month = @selected_month - 1.month
@@ -318,7 +298,8 @@ class DashboardController < ApplicationController
       
       # Usar la misma lógica que calculate_monthly_summary para garantizar consistencia
       # Excluir pagos de tarjeta de crédito
-      income = calculate_income_for_period(month_start, month_end)
+      income_data = calculate_income_for_period(month_start, month_end)
+      income = income_data[:amount]
       # #region agent log
       begin
         all_month_cargos = month_transactions.cargos
